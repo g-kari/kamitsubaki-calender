@@ -1041,31 +1041,10 @@ END:VCALENDAR`;
 
         async function fetchKamitsubakiEvents() {
             try {
-                // KAMITSUBAKI公式サイトから最新情報を取得（CORS制限のため、実際の環境では代替手段が必要）
-                const response = await fetch('https://kamitsubaki.jp/event/', {
-                    mode: 'cors'
-                });
-                
-                if (!response.ok) {
-                    throw new Error('イベント情報の取得に失敗しました');
-                }
-
-                const html = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                
-                // イベント情報を解析（実際の実装では、サイト構造に合わせて調整が必要）
-                const eventElements = doc.querySelectorAll('.event-item'); // 仮のセレクタ
-                const newEvents = Array.from(eventElements).map(element => {
-                    // イベント情報の解析ロジック
-                    return {
-                        title: element.querySelector('.event-title')?.textContent || 'イベント',
-                        date: element.querySelector('.event-date')?.textContent || '2025-06-01',
-                        // ... その他のフィールド
-                    };
-                });
-
-                return newEvents;
+                // CORS制限により直接取得は不可のため、モックAPIを使用
+                // 実際の環境では、バックエンドAPI経由または公式APIを使用
+                console.log('イベント情報を更新中...');
+                return await mockApiUpdate();
             } catch (error) {
                 console.error('イベント取得エラー:', error);
                 // フォールバック: 手動更新された最新情報
