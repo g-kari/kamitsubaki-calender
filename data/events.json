@@ -15,7 +15,7 @@
       "description": "最新のMR技術を使った神椿市の世界観を体験できます",
       "tags": ["MR", "体験会"],
       "status": "",
-      "url": "https://kamitsubaki.jp/event/"
+      "url": "https://kamitsubaki.jp/event/mr-content-tokyo/"
     },
     {
       "id": "initial-2",
@@ -31,7 +31,7 @@
       "description": "花譜の待望のソロライブ",
       "tags": ["花譜", "ソロライブ"],
       "status": "",
-      "url": "https://kamitsubaki.jp/event/"
+      "url": "https://kamitsubaki.jp/event/kafu-solo-live-2025/"
     },
     {
       "id": "initial-3",
@@ -47,7 +47,7 @@
       "description": "V.W.Pの初単独ライブ",
       "tags": ["V.W.P", "初ライブ"],
       "status": "",
-      "url": "https://kamitsubaki.jp/event/"
+      "url": "https://kamitsubaki.jp/event/vwp-1st-live/"
     },
     {
       "id": "initial-4",
@@ -63,7 +63,7 @@
       "description": "理芽と春猿火による特別合同ライブ",
       "tags": ["理芽", "春猿火", "合同ライブ"],
       "status": "",
-      "url": "https://kamitsubaki.jp/event/"
+      "url": "https://kamitsubaki.jp/event/rime-harumachibi-joint-live/"
     }
   ]
 }
