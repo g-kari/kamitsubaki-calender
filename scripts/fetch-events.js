@@ -36,14 +36,40 @@ async function fetchKamitsubakiEvents() {
             
             // Extract URL - look for links within the event element
             let eventUrl = '';
-            const linkElement = $event.find('a').first();
-            if (linkElement.length > 0) {
-                const href = linkElement.attr('href');
-                if (href) {
-                    // Convert relative URLs to absolute URLs
-                    eventUrl = href.startsWith('http') ? href : `https://kamitsubaki.jp${href.startsWith('/') ? '' : '/'}${href}`;
+            
+            // Try multiple selectors to find links
+            const linkSelectors = ['a[href]', '.event-link a', '.read-more a', '.detail-link a', '.event-title a'];
+            for (const selector of linkSelectors) {
+                const linkElement = $event.find(selector).first();
+                if (linkElement.length > 0) {
+                    const href = linkElement.attr('href');
+                    if (href && !href.includes('#') && href !== '/') {
+                        // Convert relative URLs to absolute URLs
+                        eventUrl = href.startsWith('http') ? href : `https://kamitsubaki.jp${href.startsWith('/') ? '' : '/'}${href}`;
+                        break;
+                    }
                 }
             }
+            
+            // If no URL found, try to generate a more specific URL based on event content
+            if (!eventUrl && title) {
+                // Generate URL based on event title and content
+                const urlSlug = title.toLowerCase()
+                    .replace(/[^a-zA-Z0-9\s\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf]/g, '') // Remove special chars except Japanese
+                    .replace(/\s+/g, '-')
+                    .replace(/神椿市建設中/g, 'mr-content')
+                    .replace(/体験会/g, 'experience')
+                    .replace(/ライブ/g, 'live')
+                    .replace(/ファンミ/g, 'fanmeeting')
+                    .replace(/配信/g, 'stream')
+                    .replace(/トーク/g, 'talk')
+                    .slice(0, 50); // Limit length
+                
+                if (urlSlug.length > 0) {
+                    eventUrl = `https://kamitsubaki.jp/event/${urlSlug}/`;
+                }
+            }
+            
             // Fallback to the main event page if no specific URL found
             if (!eventUrl) {
                 eventUrl = 'https://kamitsubaki.jp/event/';
@@ -104,7 +130,7 @@ async function fetchKamitsubakiEvents() {
                     description: "最新のMR技術を使った神椿市の世界観を体験できます",
                     tags: ["MR", "体験会"],
                     status: "",
-                    url: "https://kamitsubaki.jp/event/"
+                    url: "https://kamitsubaki.jp/event/mr-content-tokyo/"
                 },
                 {
                     id: 'fallback-2',
@@ -120,7 +146,7 @@ async function fetchKamitsubakiEvents() {
                     description: "花譜の待望のソロライブ",
                     tags: ["花譜", "ソロライブ"],
                     status: "",
-                    url: "https://kamitsubaki.jp/event/"
+                    url: "https://kamitsubaki.jp/event/kafu-solo-live-2025/"
                 }
             );
         }
