@@ -14,7 +14,8 @@
       "ticketInfo": "事前予約制",
       "description": "最新のMR技術を使った神椿市の世界観を体験できます",
       "tags": ["MR", "体験会"],
-      "status": ""
+      "status": "",
+      "url": "https://kamitsubaki.jp/event/"
     },
     {
       "id": "initial-2",
@@ -29,7 +30,8 @@
       "ticketInfo": "全席指定 ¥8,000",
       "description": "花譜の待望のソロライブ",
       "tags": ["花譜", "ソロライブ"],
-      "status": ""
+      "status": "",
+      "url": "https://kamitsubaki.jp/event/"
     },
     {
       "id": "initial-3",
@@ -44,7 +46,8 @@
       "ticketInfo": "全席指定 ¥7,500",
       "description": "V.W.Pの初単独ライブ",
       "tags": ["V.W.P", "初ライブ"],
-      "status": ""
+      "status": "",
+      "url": "https://kamitsubaki.jp/event/"
     },
     {
       "id": "initial-4",
@@ -59,7 +62,8 @@
       "ticketInfo": "全席指定 ¥9,000",
       "description": "理芽と春猿火による特別合同ライブ",
       "tags": ["理芽", "春猿火", "合同ライブ"],
-      "status": ""
+      "status": "",
+      "url": "https://kamitsubaki.jp/event/"
     }
   ]
 }

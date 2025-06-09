@@ -34,6 +34,21 @@ async function fetchKamitsubakiEvents() {
             const venue = $event.find('.venue, .location, .place').first().text().trim();
             const performers = $event.find('.performers, .artist, .member').text().trim();
             
+            // Extract URL - look for links within the event element
+            let eventUrl = '';
+            const linkElement = $event.find('a').first();
+            if (linkElement.length > 0) {
+                const href = linkElement.attr('href');
+                if (href) {
+                    // Convert relative URLs to absolute URLs
+                    eventUrl = href.startsWith('http') ? href : `https://kamitsubaki.jp${href.startsWith('/') ? '' : '/'}${href}`;
+                }
+            }
+            // Fallback to the main event page if no specific URL found
+            if (!eventUrl) {
+                eventUrl = 'https://kamitsubaki.jp/event/';
+            }
+            
             if (title && title.length > 0) {
                 // Parse date - this is a simplified parser, may need adjustment
                 let eventDate = '2025-06-01';
@@ -65,7 +80,8 @@ async function fetchKamitsubakiEvents() {
                     ticketInfo: 'チケット情報は公式サイトをご確認ください',
                     description: '',
                     tags: [],
-                    status: ''
+                    status: '',
+                    url: eventUrl
                 });
             }
         });
@@ -87,7 +103,8 @@ async function fetchKamitsubakiEvents() {
                     ticketInfo: "事前予約制",
                     description: "最新のMR技術を使った神椿市の世界観を体験できます",
                     tags: ["MR", "体験会"],
-                    status: ""
+                    status: "",
+                    url: "https://kamitsubaki.jp/event/"
                 },
                 {
                     id: 'fallback-2',
@@ -102,7 +119,8 @@ async function fetchKamitsubakiEvents() {
                     ticketInfo: "全席指定 ¥8,000",
                     description: "花譜の待望のソロライブ",
                     tags: ["花譜", "ソロライブ"],
-                    status: ""
+                    status: "",
+                    url: "https://kamitsubaki.jp/event/"
                 }
             );
         }
@@ -128,7 +146,8 @@ async function fetchKamitsubakiEvents() {
                 ticketInfo: "公式サイトをご確認ください",
                 description: "最新情報の取得に失敗しました。公式サイトをご確認ください。",
                 tags: ["エラー"],
-                status: "ERROR"
+                status: "ERROR",
+                url: "https://kamitsubaki.jp/event/"
             }
         ];
     }
