@@ -1,10 +1,10 @@
 {
-  "lastUpdated": "2025-01-14T00:00:00.000Z",
+  "lastUpdated": "2025-06-09T16:40:00.000Z",
   "events": [
     {
       "id": "initial-1",
       "title": "神椿市建設中。MRコンテンツ体験会（東京会場）",
-      "date": "2025-06-01",
+      "date": "2025-12-01",
       "time": "14:00",
       "endTime": "18:00",
       "venue": "Tokyo XR World",
@@ -15,12 +15,12 @@
       "description": "最新のMR技術を使った神椿市の世界観を体験できます",
       "tags": ["MR", "体験会"],
       "status": "",
-      "url": "https://kamitsubaki.jp/event/mr-content-tokyo/"
+      "url": "https://kamitsubaki.jp/event/"
     },
     {
       "id": "initial-2",
       "title": "花譜 solo live 2025",
-      "date": "2025-06-15",
+      "date": "2025-12-15",
       "time": "19:00",
       "endTime": "21:00",
       "venue": "Zepp Tokyo",
@@ -31,7 +31,7 @@
       "description": "花譜の待望のソロライブ",
       "tags": ["花譜", "ソロライブ"],
       "status": "",
-      "url": "https://kamitsubaki.jp/event/kafu-solo-live-2025/"
+      "url": "https://kamitsubaki.jp/event/"
     },
     {
       "id": "initial-3",
@@ -47,7 +47,7 @@
       "description": "V.W.Pの初単独ライブ",
       "tags": ["V.W.P", "初ライブ"],
       "status": "",
-      "url": "https://kamitsubaki.jp/event/vwp-1st-live/"
+      "url": "https://kamitsubaki.jp/event/"
     },
     {
       "id": "initial-4",
@@ -63,7 +63,7 @@
       "description": "理芽と春猿火による特別合同ライブ",
       "tags": ["理芽", "春猿火", "合同ライブ"],
       "status": "",
-      "url": "https://kamitsubaki.jp/event/rime-harumachibi-joint-live/"
+      "url": "https://kamitsubaki.jp/event/"
     }
   ]
 }

@@ -77,7 +77,7 @@ async function fetchKamitsubakiEvents() {
             
             if (title && title.length > 0) {
                 // Parse date - this is a simplified parser, may need adjustment
-                let eventDate = '2025-06-01';
+                let eventDate = '2025-12-01';
                 let eventTime = '19:00';
                 
                 if (dateText) {
@@ -119,7 +119,7 @@ async function fetchKamitsubakiEvents() {
                 {
                     id: 'fallback-1',
                     title: "神椿市建設中。MRコンテンツ体験会（東京会場）",
-                    date: "2025-06-01",
+                    date: "2025-12-01",
                     time: "14:00",
                     endTime: "18:00",
                     venue: "Tokyo XR World",
@@ -130,12 +130,12 @@ async function fetchKamitsubakiEvents() {
                     description: "最新のMR技術を使った神椿市の世界観を体験できます",
                     tags: ["MR", "体験会"],
                     status: "",
-                    url: "https://kamitsubaki.jp/event/mr-content-tokyo/"
+                    url: "https://kamitsubaki.jp/event/"
                 },
                 {
                     id: 'fallback-2',
                     title: "花譜 solo live 2025",
-                    date: "2025-06-15",
+                    date: "2025-12-15",
                     time: "19:00",
                     endTime: "21:00",
                     venue: "Zepp Tokyo",
@@ -146,7 +146,7 @@ async function fetchKamitsubakiEvents() {
                     description: "花譜の待望のソロライブ",
                     tags: ["花譜", "ソロライブ"],
                     status: "",
-                    url: "https://kamitsubaki.jp/event/kafu-solo-live-2025/"
+                    url: "https://kamitsubaki.jp/event/"
                 }
             );
         }
@@ -162,7 +162,7 @@ async function fetchKamitsubakiEvents() {
             {
                 id: 'error-fallback-1',
                 title: "イベント情報更新エラー",
-                date: "2025-06-01",
+                date: "2025-12-01",
                 time: "00:00",
                 endTime: "00:00",
                 venue: "システムエラー",
