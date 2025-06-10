@@ -4,35 +4,52 @@ const fs = require('fs');
 const path = require('path');
 
 async function fetchKamitsubakiEvents() {
-    try {
-        console.log('Fetching events from KAMITSUBAKI official site...');
-        
-        // Fetch the events page
-        const response = await fetch('https://kamitsubaki.jp/event/', {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const html = await response.text();
-        const $ = cheerio.load(html);
-        
-        const events = [];
-        
-        // Parse event information from the website
-        // Note: The actual selectors will need to be adjusted based on the real site structure
-        $('.event-item, .event, .event-list-item').each((index, element) => {
-            const $event = $(element);
+    const maxRetries = 3;
+    const retryDelay = 2000; // 2 seconds
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            console.log(`Fetching events from KAMITSUBAKI official site... (attempt ${attempt}/${maxRetries})`);
             
-            // Extract event information
-            const title = $event.find('.event-title, .title, h2, h3').first().text().trim();
-            const dateText = $event.find('.event-date, .date, .event-time').first().text().trim();
-            const venue = $event.find('.venue, .location, .place').first().text().trim();
-            const performers = $event.find('.performers, .artist, .member').text().trim();
+            // Fetch the events page with better error handling and timeout
+            const response = await fetch('https://kamitsubaki.jp/event/', {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language': 'ja,en-US;q=0.7,en;q=0.3',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Connection': 'keep-alive',
+                    'Upgrade-Insecure-Requests': '1'
+                },
+                timeout: 15000, // 15 second timeout
+                agent: false, // Disable connection pooling for firewall compatibility
+                follow: 5, // Allow up to 5 redirects
+                compress: true // Handle gzip compression
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const html = await response.text();
+            console.log(`Successfully fetched HTML content (${html.length} characters)`);
+            
+            const $ = cheerio.load(html);
+            const events = [];
+            
+            // Use the correct selector for KAMITSUBAKI event structure
+            const eventElements = $('article.event--lineup__block');
+            console.log(`Found ${eventElements.length} event elements`);
+            
+            eventElements.each((index, element) => {
+                const $event = $(element);
+                
+                // Extract event information using the correct selectors for KAMITSUBAKI site
+                const title = $event.find('h3').first().text().trim();
+                const dateElement = $event.find('.date, .time').first();
+                const dateText = dateElement.length > 0 ? dateElement.text().trim() : $event.text().match(/\d{4}年\d{1,2}月\d{1,2}日/)?.[0] || '';
+                const venue = $event.find('.place').first().text().trim();
+                const performers = $event.find('h2').first().text().trim(); // Artist name is in h2
             
             // Extract URL - look for links within the event element
             let eventUrl = '';
@@ -75,47 +92,89 @@ async function fetchKamitsubakiEvents() {
                 eventUrl = 'https://kamitsubaki.jp/event/';
             }
             
-            if (title && title.length > 0) {
-                // Parse date - this is a simplified parser, may need adjustment
-                let eventDate = '2025-12-01';
-                let eventTime = '19:00';
-                
-                if (dateText) {
-                    const dateMatch = dateText.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
-                    const timeMatch = dateText.match(/(\d{1,2}):(\d{2})/);
+                if (title && title.length > 0) {
+                    // Parse date - handle Japanese date format (年月日)
+                    let eventDate = '2025-12-01';
+                    let eventTime = '19:00';
                     
-                    if (dateMatch) {
-                        eventDate = `${dateMatch[1]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[3].padStart(2, '0')}`;
+                    // Look for date patterns in both dateText and full element text
+                    const fullText = $event.text();
+                    
+                    // Try Japanese date format first (2025年8月30日)
+                    const japDateMatch = fullText.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+                    if (japDateMatch) {
+                        const [, year, month, day] = japDateMatch;
+                        eventDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                    } else if (dateText) {
+                        // Fallback to standard date format
+                        const dateMatch = dateText.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+                        if (dateMatch) {
+                            eventDate = `${dateMatch[1]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[3].padStart(2, '0')}`;
+                        }
                     }
                     
+                    // Try to extract time
+                    const timeMatch = fullText.match(/(\d{1,2}):(\d{2})/);
                     if (timeMatch) {
                         eventTime = `${timeMatch[1].padStart(2, '0')}:${timeMatch[2]}`;
                     }
+                    
+                    // Determine event category based on title
+                    let category = 'live';
+                    if (title.includes('体験') || title.includes('MR')) category = 'experience';
+                    else if (title.includes('ファンミ') || title.includes('meeting')) category = 'fanmeeting';
+                    else if (title.includes('配信') || title.includes('LIVE')) category = 'live';
+                    else if (title.includes('トーク')) category = 'talk';
+                    
+                    events.push({
+                        id: `event-${Date.now()}-${index}`,
+                        title: title,
+                        date: eventDate,
+                        time: eventTime,
+                        endTime: eventTime, // Default to same time, could be enhanced
+                        venue: venue || 'TBD',
+                        address: '', // Could be extracted from venue if needed
+                        performers: performers || '',
+                        category: category,
+                        ticketInfo: 'チケット情報は公式サイトをご確認ください',
+                        description: '', // Could be extracted from content
+                        tags: [], // Could be auto-generated based on title/performers
+                        status: '',
+                        url: eventUrl
+                    });
+                    
+                    console.log(`Extracted event ${index + 1}: ${title} at ${venue} on ${eventDate}`);
                 }
-                
-                events.push({
-                    id: `event-${Date.now()}-${index}`,
-                    title: title,
-                    date: eventDate,
-                    time: eventTime,
-                    endTime: eventTime,
-                    venue: venue || 'TBD',
-                    address: '',
-                    performers: performers || '',
-                    category: 'live',
-                    ticketInfo: 'チケット情報は公式サイトをご確認ください',
-                    description: '',
-                    tags: [],
-                    status: '',
-                    url: eventUrl
-                });
+            });
+            
+            // If events were found, return them
+            if (events.length > 0) {
+                console.log(`Successfully extracted ${events.length} events`);
+                return events;
             }
-        });
-        
-        // If no events were found, provide fallback data
-        if (events.length === 0) {
+            
+            // If no events found but network was successful, log warning and use fallback
             console.log('No events found from website, using fallback data...');
-            events.push(
+            return getFallbackEvents();
+            
+        } catch (error) {
+            console.error(`Attempt ${attempt} failed:`, error.message);
+            
+            // If this was the last attempt, return fallback data
+            if (attempt === maxRetries) {
+                console.error('All retry attempts failed, using fallback data...');
+                return getFallbackEvents();
+            }
+            
+            // Wait before retrying
+            console.log(`Waiting ${retryDelay}ms before retry...`);
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+    }
+}
+
+function getFallbackEvents() {
+    return [
                 {
                     id: 'fallback-1',
                     title: "神椿市建設中。MRコンテンツ体験会（東京会場）",
@@ -148,35 +207,7 @@ async function fetchKamitsubakiEvents() {
                     status: "",
                     url: "https://kamitsubaki.jp/event/"
                 }
-            );
-        }
-        
-        console.log(`Found ${events.length} events`);
-        return events;
-        
-    } catch (error) {
-        console.error('Error fetching events:', error);
-        
-        // Return fallback data on error
-        return [
-            {
-                id: 'error-fallback-1',
-                title: "イベント情報更新エラー",
-                date: "2025-12-01",
-                time: "00:00",
-                endTime: "00:00",
-                venue: "システムエラー",
-                address: "",
-                performers: "",
-                category: "system",
-                ticketInfo: "公式サイトをご確認ください",
-                description: "最新情報の取得に失敗しました。公式サイトをご確認ください。",
-                tags: ["エラー"],
-                status: "ERROR",
-                url: "https://kamitsubaki.jp/event/"
-            }
-        ];
-    }
+            ];
 }
 
 async function main() {

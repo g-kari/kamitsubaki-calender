@@ -9,6 +9,7 @@ on:
 jobs:
   update-events:
     runs-on: ubuntu-latest
+    timeout-minutes: 10 # Add timeout for the entire job
     
     steps:
     - name: Checkout repository
@@ -24,8 +25,24 @@ jobs:
         npm install cheerio node-fetch@2
         
     - name: Fetch and update event data
+      id: fetch-events
+      continue-on-error: true # Don't fail the workflow if fetch fails
       run: |
-        node scripts/fetch-events.js
+        timeout 300 node scripts/fetch-events.js || echo "Fetch failed, will use existing data"
+        
+    - name: Check if events data exists and is valid
+      run: |
+        if [ ! -f data/events.json ]; then
+          echo "No events.json found, creating minimal fallback"
+          mkdir -p data
+          echo '{"lastUpdated":"'$(date -u +%Y-%m-%dT%H:%M:%S.000Z)'","events":[]}' > data/events.json
+        fi
+        
+        # Validate JSON format
+        if ! node -e "JSON.parse(require('fs').readFileSync('data/events.json', 'utf8'))"; then
+          echo "Invalid JSON, restoring from git"
+          git checkout HEAD -- data/events.json || echo "No previous version available"
+        fi
         
     - name: Commit and push changes
       run: |
@@ -34,7 +51,16 @@ jobs:
         git add data/events.json
         if ! git diff --staged --quiet; then
           git commit -m "Update event data - $(date '+%Y-%m-%d %H:%M:%S')"
-          git push
+          # Retry push up to 3 times in case of network issues
+          for i in {1..3}; do
+            if git push; then
+              echo "Push successful on attempt $i"
+              break
+            else
+              echo "Push failed on attempt $i, retrying..."
+              sleep 5
+            fi
+          done
         else
           echo "No changes to commit"
         fi
