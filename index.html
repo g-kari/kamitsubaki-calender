@@ -733,11 +733,17 @@
 
             .calendar-nav-controls {
                 gap: 15px;
+                flex-wrap: wrap;
             }
 
             #currentMonthYear {
                 font-size: 1.2rem;
                 min-width: 150px;
+            }
+
+            .nav-btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -1731,6 +1737,13 @@ END:VCALENDAR`;
             }
         });
 
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeEventModal();
+            }
+        });
+
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {
             // 全イベントにタグを追加（既存データの強化）
@@ -1760,6 +1773,7 @@ END:VCALENDAR`;
             filteredEvents = [...events];
             renderEvents();
             updateStats();
+            updateCalendarHeader(); // Initialize calendar header
             
             // ページロード時に自動更新を実行
             setTimeout(updateEvents, 1000);
