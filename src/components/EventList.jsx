@@ -47,7 +47,7 @@ function EventList({ events, onEventClick }) {
               <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
                 <div className="v0-event-card-content">
                   <div className="v0-event-date-section">
-                    <div className="v0-event-year">2025</div>
+                    <div className="v0-event-year">{new Date(event.date).getFullYear()}</div>
                     <div className="v0-event-date">
                       {day}.{month}
                     </div>
