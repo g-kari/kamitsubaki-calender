@@ -2,10 +2,23 @@ import React from 'react'
 
 function Header() {
   return (
-    <div className="header">
-      <h1>🌸 KAMITSUBAKI 自動更新カレンダー 🌸</h1>
-      <p>神椿スタジオの最新イベント情報を自動で取得・更新します（GitHub Actions使用）</p>
-    </div>
+    <header className="new-header">
+      <div className="header-container">
+        <div className="header-left">
+          <div className="header-logo">
+            <span className="logo-text">神椿</span>
+          </div>
+          <div className="header-titles">
+            <h1 className="header-main-title">神椿市建設中。</h1>
+            <p className="header-subtitle">KAMITSUBAKI CITY UNDER CONSTRUCTION</p>
+          </div>
+        </div>
+        <div className="header-right">
+          <div className="header-brand">W✕W</div>
+          <div className="header-tagline">Virtual Witch Phenomenon</div>
+        </div>
+      </div>
+    </header>
   )
 }
 

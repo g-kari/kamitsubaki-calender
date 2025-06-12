@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import Header from './components/Header'
+import Navigation from './components/Navigation'
 import UpdateInfo from './components/UpdateInfo'
 import StatsSection from './components/StatsSection'
 import SubscriptionSection from './components/SubscriptionSection'
@@ -300,6 +301,11 @@ function App() {
   return (
     <div className="container">
       <Header />
+      
+      <Navigation 
+        currentView={currentViewMode}
+        onViewChange={setCurrentViewMode}
+      />
       
       <UpdateInfo
         loading={loading}
