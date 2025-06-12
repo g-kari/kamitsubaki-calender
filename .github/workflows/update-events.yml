@@ -23,6 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
         npm install cheerio node-fetch@2
+        npm install
         
     - name: Fetch and update event data
       id: fetch-events
@@ -44,13 +45,24 @@ jobs:
           git checkout HEAD -- data/events.json || echo "No previous version available"
         fi
         
+    - name: Copy data to public directory
+      run: |
+        mkdir -p public/data
+        cp data/events.json public/data/
+        
+    - name: Build React application
+      run: |
+        npm run build
+        cp dist/index-react.html index.html
+        cp -r dist/assets assets/
+        
     - name: Commit and push changes
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add data/events.json
+        git add data/events.json public/data/events.json index.html assets/
         if ! git diff --staged --quiet; then
-          git commit -m "Update event data - $(date '+%Y-%m-%d %H:%M:%S')"
+          git commit -m "Update event data and rebuild React app - $(date '+%Y-%m-%d %H:%M:%S')"
           # Retry push up to 3 times in case of network issues
           for i in {1..3}; do
             if git push; then
