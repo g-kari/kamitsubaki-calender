@@ -8,14 +8,22 @@
       "time": "17:00",
       "endTime": "17:00",
       "venue": "豊洲PIT",
-      "address": "",
+      "address": "東京都江東区豊洲6-1-23",
       "performers": "明透",
       "category": "live",
       "ticketInfo": "チケット情報は公式サイトをご確認ください",
-      "description": "",
-      "tags": [],
+      "description": "明透2ndワンマンライブ",
+      "tags": ["明透", "ライブ"],
       "status": "",
-      "url": "https://toyosu.pia-pit.jp/access/"
+      "url": "https://toyosu.pia-pit.jp/access/",
+      "image": "https://kamitsubaki.jp/assets/img/artists/meito.jpg",
+      "access": {
+        "station": "ゆりかもめ 新豊洲駅",
+        "walkTime": "徒歩3分",
+        "address": "東京都江東区豊洲6-1-23",
+        "mapUrl": "https://maps.google.com/maps?q=豊洲PIT",
+        "notes": "新豊洲駅直結"
+      }
     },
     {
       "id": "event-1749529441083-1",

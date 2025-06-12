@@ -13,9 +13,10 @@
 
         body {
             font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
             padding: 20px;
+            color: #333;
         }
 
         .container {
@@ -37,7 +38,7 @@
             color: #333;
             font-size: 2.5rem;
             margin-bottom: 10px;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, #e91e63, #9c27b0, #673ab7);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -196,7 +197,7 @@
         }
 
         .register-btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, #e91e63, #9c27b0);
             color: white;
             border: none;
             padding: 12px 25px;
@@ -211,7 +212,7 @@
 
         .register-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 25px rgba(233, 30, 99, 0.4);
         }
 
         .register-btn:active {
@@ -568,7 +569,7 @@
         }
 
         .calendar-header {
-            background: linear-gradient(45deg, #667eea, #764ba2);
+            background: linear-gradient(45deg, #e91e63, #9c27b0);
             color: white;
             padding: 15px 10px;
             text-align: center;
@@ -918,7 +919,15 @@
                 id: "mr-content-tokyo-1",
                 tags: ["MR", "体験会", "無料", "東京"],
                 category: "体験会",
-                url: "https://kamitsubaki.jp/event/"
+                url: "https://kamitsubaki.jp/event/",
+                image: "https://kamitsubaki.jp/assets/img/news/mr-experience.jpg",
+                access: {
+                    station: "JR山手線 渋谷駅",
+                    walkTime: "徒歩5分",
+                    address: "東京都渋谷区宇田川町21-6",
+                    mapUrl: "https://maps.google.com/maps?q=渋谷TSUTAYA",
+                    notes: "渋谷109の隣のビル6階"
+                }
             },
             {
                 title: "神椿市建設中。MRコンテンツ体験会（東京会場 2日目）",
@@ -931,7 +940,15 @@
                 description: "店舗型イマーシブシアター「ニジゲート」での神椿市建設中。MRコンテンツ体験（無料）",
                 status: "NEW!",
                 id: "mr-content-tokyo-2",
-                url: "https://kamitsubaki.jp/event/"
+                url: "https://kamitsubaki.jp/event/",
+                image: "https://kamitsubaki.jp/assets/img/news/mr-experience.jpg",
+                access: {
+                    station: "JR山手線 渋谷駅",
+                    walkTime: "徒歩5分",
+                    address: "東京都渋谷区宇田川町21-6",
+                    mapUrl: "https://maps.google.com/maps?q=渋谷TSUTAYA",
+                    notes: "渋谷109の隣のビル6階"
+                }
             },
             {
                 title: "神椿市建設中。MRコンテンツ体験会（大阪会場）",
@@ -944,7 +961,15 @@
                 description: "店舗型イマーシブシアター「ニジゲート」での神椿市建設中。MRコンテンツ体験（1,000円・オリジナル画像特典付き）※8月31日まで開催",
                 status: "NEW!",
                 id: "mr-content-osaka",
-                url: "https://kamitsubaki.jp/event/"
+                url: "https://kamitsubaki.jp/event/",
+                image: "https://kamitsubaki.jp/assets/img/news/mr-experience-osaka.jpg",
+                access: {
+                    station: "大阪メトロ 日本橋駅",
+                    walkTime: "徒歩2分",
+                    address: "大阪府大阪市中央区道頓堀1-6-8",
+                    mapUrl: "https://maps.google.com/maps?q=TSUTAYA+EBISUBASHI",
+                    notes: "戎橋の隣、地下直結"
+                }
             },
             {
                 title: "KAMITSUBAKI WARS 2025 神椿後楽園戦線 KAMITSUBAKI XPERIENCE DAY1",
@@ -957,7 +982,15 @@
                 description: "KAMITSUBAKI WARS 2025 第1日目",
                 status: "開催決定",
                 id: "kamitsubaki-wars-2025-day1",
-                url: "https://kamitsubaki.jp/event/"
+                url: "https://kamitsubaki.jp/event/",
+                image: "https://kamitsubaki.jp/assets/img/events/kamitsubaki-wars-2025.jpg",
+                access: {
+                    station: "JR中央・総武線 水道橋駅",
+                    walkTime: "徒歩3分",
+                    address: "東京都文京区後楽1-3-61 ミーツポート1F",
+                    mapUrl: "https://maps.google.com/maps?q=東京ドームシティホール",
+                    notes: "東京ドームシティ内、LaQua隣接"
+                }
             },
             {
                 title: "KAMITSUBAKI WARS 2025 神椿後楽園戦線 KAMITSUBAKI XPERIENCE DAY2",
@@ -1124,8 +1157,9 @@ END:VCALENDAR`;
                 // アーティストフィルター
                 let artistMatch = true;
                 if (artistFilter !== 'all') {
-                    artistMatch = event.performers.toLowerCase().includes(artistFilter) || 
-                                 event.title.toLowerCase().includes(artistFilter);
+                    artistMatch = (event.performers && event.performers.toLowerCase().includes(artistFilter)) || 
+                                 (event.title && event.title.toLowerCase().includes(artistFilter)) ||
+                                 (event.tags && event.tags.some(tag => tag.toLowerCase().includes(artistFilter)));
                 }
                 
                 // 検索フィルター
@@ -1134,7 +1168,10 @@ END:VCALENDAR`;
                     searchMatch = event.title.toLowerCase().includes(searchTerm) ||
                                  event.performers.toLowerCase().includes(searchTerm) ||
                                  event.venue.toLowerCase().includes(searchTerm) ||
-                                 event.description.toLowerCase().includes(searchTerm);
+                                 (event.description && event.description.toLowerCase().includes(searchTerm)) ||
+                                 (event.address && event.address.toLowerCase().includes(searchTerm)) ||
+                                 (event.access && event.access.station && event.access.station.toLowerCase().includes(searchTerm)) ||
+                                 (event.tags && event.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
                 }
                 
                 return dateMatch && artistMatch && searchMatch;
@@ -1462,6 +1499,7 @@ END:VCALENDAR`;
                 
                 eventCard.innerHTML = `
                     <div class="day-badge ${event.status === 'NEW!' ? 'new' : event.status === 'UPDATED' ? 'updated' : ''}">${event.status}</div>
+                    ${event.image ? `<div class="event-image"><img src="${event.image}" alt="${event.title}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px; margin-bottom: 15px;" onerror="this.style.display='none'"></div>` : ''}
                     <h3 class="event-title">${event.title}</h3>
                     ${tagsHtml ? `<div class="event-tags">${tagsHtml}</div>` : ''}
                     <div class="event-details">
@@ -1474,11 +1512,18 @@ END:VCALENDAR`;
                         <div class="event-detail">
                             <strong>🏢 住所:</strong> ${event.address}
                         </div>
+                        ${event.access ? `<div class="access-info" style="background: #f8f9ff; padding: 10px; border-radius: 8px; margin: 10px 0;">
+                            <strong>🚗 アクセス情報:</strong><br>
+                            ${event.access.station ? `<small>最寄駅: ${event.access.station}</small><br>` : ''}
+                            ${event.access.walkTime ? `<small>駅から: ${event.access.walkTime}</small><br>` : ''}
+                            ${event.access.notes ? `<small>備考: ${event.access.notes}</small><br>` : ''}
+                            ${event.access.mapUrl ? `<a href="${event.access.mapUrl}" target="_blank" style="color: #e91e63; font-size: 0.9rem;">📍 地図で確認</a>` : ''}
+                        </div>` : ''}
                         <div class="performers">
                             <strong>🎤 出演:</strong> ${event.performers}
                         </div>
                         ${event.url ? `<div class="event-detail">
-                            <strong>🔗 詳細:</strong> <a href="${event.url}" target="_blank" rel="noopener noreferrer" style="color: #667eea; text-decoration: none;">公式イベントページ</a>
+                            <strong>🔗 詳細:</strong> <a href="${event.url}" target="_blank" rel="noopener noreferrer" style="color: #e91e63; text-decoration: none;">公式イベントページ</a>
                         </div>` : ''}
                     </div>
                     <div style="display: flex; gap: 10px; margin-bottom: 10px;">
@@ -1525,7 +1570,7 @@ END:VCALENDAR`;
             // Create calendar days
             for (let i = 0; i < 42; i++) {
                 const cellDate = new Date(startDate);
-                cellDate.setDate(startDate.getDate() + i);
+                cellDate.setDate(cellDate.getDate() + i);
                 
                 const dayCell = document.createElement('div');
                 dayCell.className = 'calendar-day';
@@ -1655,7 +1700,7 @@ END:VCALENDAR`;
                         <strong>🎤 出演:</strong> ${event.performers}
                     </div>
                     ${event.url ? `<div class="event-detail">
-                        <strong>🔗 詳細:</strong> <a href="${event.url}" target="_blank" rel="noopener noreferrer" style="color: #667eea; text-decoration: none;">公式イベントページ</a>
+                        <strong>🔗 詳細:</strong> <a href="${event.url}" target="_blank" rel="noopener noreferrer" style="color: #e91e63; text-decoration: none;">公式イベントページ</a>
                     </div>` : ''}
                 </div>
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
