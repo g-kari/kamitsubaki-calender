@@ -5,14 +5,14 @@ function Navigation({ currentView, onViewChange }) {
     <nav className="navigation">
       <div className="nav-container">
         <button 
-          className={`nav-button ${currentView === 'grid' ? 'active' : ''}`}
-          onClick={() => onViewChange('grid')}
+          className={`nav-button ${currentView === 'calendar' ? 'active' : ''}`}
+          onClick={() => onViewChange('calendar')}
         >
           カレンダー
         </button>
         <button 
-          className={`nav-button ${currentView === 'calendar' ? 'active' : ''}`}
-          onClick={() => onViewChange('calendar')}
+          className={`nav-button ${currentView === 'events' ? 'active' : ''}`}
+          onClick={() => onViewChange('events')}
         >
           イベント情報
         </button>
