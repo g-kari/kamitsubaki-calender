@@ -4,6 +4,11 @@ on:
   pull_request:
     types: [opened, edited, synchronize]
 
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+
 jobs:
   validate-screenshots:
     runs-on: ubuntu-latest
@@ -39,12 +44,25 @@ jobs:
           const hasBeforeSection = prBody.includes('### 修正前') || prBody.includes('### Before');
           const hasAfterSection = prBody.includes('### 修正後') || prBody.includes('### After');
           const hasImages = prBody.includes('![') || prBody.includes('<img') || prBody.includes('https://') && prBody.includes('.png') || prBody.includes('.jpg') || prBody.includes('.jpeg') || prBody.includes('.gif');
+          const hasAutomatedScreenshots = prBody.includes('自動スクリーンショット') || prBody.includes('Automated Screenshots');
+          
+          // Check for automated screenshot comment
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          
+          const hasAutomatedComment = comments.some(comment => 
+            comment.body.includes('自動スクリーンショット') || 
+            comment.body.includes('Automated Screenshots')
+          );
           
           if (uiFiles.length > 0) {
             console.log(`Found ${uiFiles.length} UI-related file changes`);
             console.log('UI files:', uiFiles.map(f => f.filename).join(', '));
             
-            if (!hasAfterSection || !hasImages) {
+            if (!hasAfterSection && !hasImages && !hasAutomatedScreenshots && !hasAutomatedComment) {
               const comment = [
                 '## 📸 スクリーンショットが必要です / Screenshots Required',
                 '',
@@ -55,18 +73,27 @@ jobs:
                 uiFiles.map(f => `- \`${f.filename}\``).join('\n'),
                 '',
                 '### 必要な対応 / Required Action:',
-                'PRの説明に以下を追加してください / Please add the following to your PR description:',
+                'PRの説明に以下を追加するか、自動スクリーンショット機能を待ってください：',
+                'Please add the following to your PR description or wait for the automated screenshots:',
                 '',
                 '1. **修正後のスクリーンショット / After Screenshot** (必須 / Required)',
                 '2. 修正前のスクリーンショット / Before Screenshot (該当する場合 / If applicable)',
+                '',
+                '### 自動スクリーンショット / Automated Screenshots:',
+                '🤖 このPRでは自動スクリーンショット機能が有効です。',
+                '🤖 Automated screenshots are enabled for this PR.',
+                'しばらくすると自動でスクリーンショットがコメントに追加されます。',
+                'Screenshots will be automatically added as a comment shortly.',
                 '',
                 'スクリーンショットの追加方法 / How to add screenshots:',
                 '1. 画像をGitHubにドラッグ&ドロップ / Drag & drop images to GitHub',
                 '2. 生成されたMarkdownリンクをPR説明に貼り付け / Paste the generated Markdown links in PR description',
                 '',
                 '---',
-                '⚠️ このチェックは自動で実行されています。スクリーンショットを追加後、PRを更新してください。',
-                'This is an automated check. Please update the PR after adding screenshots.'
+                '⚠️ このチェックは自動で実行されています。',
+                '⚠️ This is an automated check.',
+                '📸 自動スクリーンショットが有効化されているため、手動でのスクリーンショット追加は任意です。',
+                '📸 Since automated screenshots are enabled, manual screenshot addition is optional.'
               ].join('\n');
 
               await github.rest.issues.createComment({
@@ -76,9 +103,9 @@ jobs:
                 body: comment
               });
               
-              core.setFailed('Screenshots required for UI changes');
+              core.setFailed('Screenshots required for UI changes - automated screenshots will be provided shortly');
             } else {
-              console.log('✅ Screenshots appear to be included');
+              console.log('✅ Screenshots found (manual or automated)');
             }
           } else {
             console.log('✅ No UI files modified, screenshot validation skipped');

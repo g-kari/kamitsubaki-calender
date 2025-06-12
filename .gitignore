@@ -138,3 +138,11 @@ dist
 # Package management files (installed by GitHub Actions)
 package.json
 package-lock.json
+
+# Screenshot testing and temporary files
+screenshots/
+test-*.png
+test-*.jpg
+*.screenshot
+server.pid
+server_base.pid
