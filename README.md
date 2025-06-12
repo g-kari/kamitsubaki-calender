@@ -34,10 +34,34 @@ npm install cheerio node-fetch@2
 node scripts/fetch-events.js
 ```
 
+## Contributing
+
+### Pull Request Requirements
+
+**📸 Screenshots Required**
+
+When submitting pull requests that modify the user interface, you **must** include screenshots:
+
+- **Before**: Screenshot showing the current state (if applicable)
+- **After**: Screenshot showing your changes (required)
+
+This helps reviewers understand the visual impact of your changes and ensures quality control for the user interface.
+
+The pull request template will guide you through the required information and screenshot format.
+
+### Guidelines
+
+- Follow existing code style and structure
+- Test changes across different browsers when possible
+- Include appropriate comments for new features
+- Ensure responsive design works on mobile and desktop
+- **Read the [Screenshot Guide](.github/SCREENSHOT_GUIDE.md)** for detailed instructions on capturing and uploading screenshots
+
 ## Files
 
 - `index.html` - Main web application
 - `.github/workflows/update-events.yml` - GitHub Actions workflow for daily updates  
+- `.github/pull_request_template.md` - Pull request template with screenshot requirements
 - `scripts/fetch-events.js` - Node.js script to fetch event data
 - `data/events.json` - Local event data storage
 - `.gitignore` - Excludes node_modules and package files (installed by GitHub Actions)

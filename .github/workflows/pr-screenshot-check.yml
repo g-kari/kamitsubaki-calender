@@ -1,0 +1,85 @@
+name: PR Screenshot Validation
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  validate-screenshots:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check PR for screenshots
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: pr } = await github.rest.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number,
+          });
+          
+          const { data: files } = await github.rest.pulls.listFiles({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number,
+          });
+          
+          // Check if PR affects UI files
+          const uiFiles = files.filter(file => 
+            file.filename.endsWith('.html') || 
+            file.filename.endsWith('.css') || 
+            file.filename.includes('style') ||
+            (file.filename.endsWith('.js') && file.patch && file.patch.includes('style'))
+          );
+          
+          const prBody = pr.body || '';
+          
+          // Check for screenshot markers in PR description
+          const hasBeforeSection = prBody.includes('### 修正前') || prBody.includes('### Before');
+          const hasAfterSection = prBody.includes('### 修正後') || prBody.includes('### After');
+          const hasImages = prBody.includes('![') || prBody.includes('<img') || prBody.includes('https://') && prBody.includes('.png') || prBody.includes('.jpg') || prBody.includes('.jpeg') || prBody.includes('.gif');
+          
+          if (uiFiles.length > 0) {
+            console.log(`Found ${uiFiles.length} UI-related file changes`);
+            console.log('UI files:', uiFiles.map(f => f.filename).join(', '));
+            
+            if (!hasAfterSection || !hasImages) {
+              const comment = [
+                '## 📸 スクリーンショットが必要です / Screenshots Required',
+                '',
+                'このプルリクエストはUIに影響するファイルを変更していますが、スクリーンショットが含まれていません。',
+                'This pull request modifies UI-related files but doesn\'t include required screenshots.',
+                '',
+                '### 変更されたファイル / Modified Files:',
+                uiFiles.map(f => `- \`${f.filename}\``).join('\n'),
+                '',
+                '### 必要な対応 / Required Action:',
+                'PRの説明に以下を追加してください / Please add the following to your PR description:',
+                '',
+                '1. **修正後のスクリーンショット / After Screenshot** (必須 / Required)',
+                '2. 修正前のスクリーンショット / Before Screenshot (該当する場合 / If applicable)',
+                '',
+                'スクリーンショットの追加方法 / How to add screenshots:',
+                '1. 画像をGitHubにドラッグ&ドロップ / Drag & drop images to GitHub',
+                '2. 生成されたMarkdownリンクをPR説明に貼り付け / Paste the generated Markdown links in PR description',
+                '',
+                '---',
+                '⚠️ このチェックは自動で実行されています。スクリーンショットを追加後、PRを更新してください。',
+                'This is an automated check. Please update the PR after adding screenshots.'
+              ].join('\n');
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+              
+              core.setFailed('Screenshots required for UI changes');
+            } else {
+              console.log('✅ Screenshots appear to be included');
+            }
+          } else {
+            console.log('✅ No UI files modified, screenshot validation skipped');
+          }
