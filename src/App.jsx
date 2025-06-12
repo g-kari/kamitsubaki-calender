@@ -158,9 +158,10 @@ function App() {
         switch (dateFilter) {
           case 'today':
             return eventDate.toDateString() === today.toDateString()
-          case 'week':
+          case 'week': {
             const oneWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
             return eventDate >= today && eventDate <= oneWeek
+          }
           case 'month':
             return eventDate.getMonth() === today.getMonth() && eventDate.getFullYear() === today.getFullYear()
           case 'upcoming':
@@ -204,12 +205,6 @@ function App() {
   const showSuccessMessage = useCallback((message) => {
     setSuccessMessage(message)
     setTimeout(() => setSuccessMessage(''), 5000)
-  }, [])
-
-  // Show error message temporarily  
-  const showError = useCallback((message) => {
-    setErrorMessage(message)
-    setTimeout(() => setErrorMessage(''), 5000)
   }, [])
 
   // Export functionality
@@ -307,7 +302,7 @@ function App() {
       
       // Request notification permission
       if ('Notification' in window && Notification.permission === 'default') {
-        Notification.requestPermission().catch(e => console.log('Failed to get notification permission'))
+        Notification.requestPermission().catch(_e => console.log('Failed to get notification permission'))
       }
     }
     
@@ -323,12 +318,13 @@ function App() {
             event.preventDefault()
             updateEvents()
             break
-          case 'f':
+          case 'f': {
             event.preventDefault()
             // Focus search input
             const searchInput = document.querySelector('.search-input')
             if (searchInput) searchInput.focus()
             break
+          }
           case 's':
             event.preventDefault()
             // Export functionality could be added here
@@ -670,7 +666,7 @@ function CalendarView({ events, currentDate, setCurrentDate, onEventClick }) {
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
   const firstDay = new Date(year, month, 1)
-  const lastDay = new Date(year, month + 1, 0)
+  // const lastDay = new Date(year, month + 1, 0) // Not currently used
   const startDate = new Date(firstDay)
   startDate.setDate(startDate.getDate() - firstDay.getDay())
 
