@@ -16,6 +16,7 @@ function Button({
   
   return (
     <button
+      type="button"
       className={classes}
       onClick={onClick}
       disabled={disabled}
