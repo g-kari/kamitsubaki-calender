@@ -25,17 +25,6 @@ function EventList({ events, onEventClick }) {
     return { month, day }
   }
 
-  const formatDateRange = (startDate, endDate) => {
-    if (!endDate || startDate === endDate) {
-      const { month, day } = formatEventDate(startDate)
-      return `${day}.${month}`
-    }
-    
-    const start = formatEventDate(startDate)
-    const end = formatEventDate(endDate)
-    return `${start.day}.${start.month} - ${end.day}.${end.month}`
-  }
-
   return (
     <div className="v0-event-list">
       <div className="v0-event-list-header">
