@@ -1,7 +1,11 @@
-const fetch = require('node-fetch');
-const cheerio = require('cheerio');
-const fs = require('fs');
-const path = require('path');
+import fetch from 'node-fetch';
+import * as cheerio from 'cheerio';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function fetchKamitsubakiEvents() {
     const maxRetries = 3;
@@ -240,8 +244,9 @@ async function main() {
     }
 }
 
-if (require.main === module) {
+// Only run main if this file is executed directly
+if (import.meta.url === `file://${process.argv[1]}`) {
     main();
 }
 
-module.exports = { fetchKamitsubakiEvents };
+export { fetchKamitsubakiEvents };
