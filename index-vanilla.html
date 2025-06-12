@@ -29,6 +29,120 @@
             padding: 40px;
         }
 
+        .new-header {
+            background: #000;
+            color: white;
+            padding: 16px;
+            margin: -40px -40px 40px -40px;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-logo {
+            width: 48px;
+            height: 48px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text {
+            color: black;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .header-titles {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-main-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0;
+            color: white;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: #d1d5db;
+            margin: 0;
+        }
+
+        .header-right {
+            text-align: right;
+        }
+
+        .header-brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .header-tagline {
+            font-size: 12px;
+            color: #d1d5db;
+        }
+
+        .navigation {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 16px;
+            margin: -40px -40px 40px -40px;
+            margin-top: 0;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav-button {
+            background: white;
+            border: 2px solid #e5e7eb;
+            color: #374151;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-button:hover {
+            border-color: #d1d5db;
+            background: #f9fafb;
+        }
+
+        .nav-button.active {
+            background: #000;
+            color: white;
+            border-color: #000;
+        }
+
+        .nav-button.active:hover {
+            background: #1f2937;
+            border-color: #1f2937;
+        }
+
         .header {
             text-align: center;
             margin-bottom: 40px;
@@ -712,6 +826,43 @@
         }
 
         @media (max-width: 768px) {
+            .new-header {
+                padding: 12px;
+                margin: -20px -20px 20px -20px;
+            }
+            
+            .header-container {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+            
+            .header-left {
+                justify-content: center;
+            }
+            
+            .header-right {
+                text-align: center;
+            }
+            
+            .header-main-title {
+                font-size: 18px;
+            }
+            
+            .header-brand {
+                font-size: 20px;
+            }
+            
+            .navigation {
+                margin: 0 -20px 20px -20px;
+                padding: 12px;
+            }
+            
+            .nav-container {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
             .container {
                 padding: 20px;
             }
@@ -762,10 +913,34 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🌸 KAMITSUBAKI 自動更新カレンダー 🌸</h1>
-            <p>神椿スタジオの最新イベント情報を自動で取得・更新します（GitHub Actions使用）</p>
-        </div>
+        <header class="new-header">
+            <div class="header-container">
+                <div class="header-left">
+                    <div class="header-logo">
+                        <span class="logo-text">神椿</span>
+                    </div>
+                    <div class="header-titles">
+                        <h1 class="header-main-title">神椿市建設中。</h1>
+                        <p class="header-subtitle">KAMITSUBAKI CITY UNDER CONSTRUCTION</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="header-brand">W✕W</div>
+                    <div class="header-tagline">Virtual Witch Phenomenon</div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="navigation">
+            <div class="nav-container">
+                <button class="nav-button active" id="gridViewBtn" onclick="setViewMode('grid')">
+                    カレンダー
+                </button>
+                <button class="nav-button" id="calendarViewBtn" onclick="setViewMode('calendar')">
+                    イベント情報
+                </button>
+            </div>
+        </nav>
 
         <div class="update-info">
             <div class="update-status">
@@ -1030,6 +1205,23 @@
                 url: "https://kamitsubaki.jp/event/"
             }
         ];
+
+        function setViewMode(mode) {
+            currentViewMode = mode;
+            
+            // Update button states
+            document.getElementById('gridViewBtn').classList.remove('active');
+            document.getElementById('calendarViewBtn').classList.remove('active');
+            
+            if (mode === 'grid') {
+                document.getElementById('gridViewBtn').classList.add('active');
+            } else {
+                document.getElementById('calendarViewBtn').classList.add('active');
+            }
+            
+            // Update the view
+            renderEvents();
+        }
 
         function createCalendarLink(event) {
             const startDate = new Date(`${event.date}T${event.time}:00+09:00`);
