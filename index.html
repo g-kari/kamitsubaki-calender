@@ -42,6 +42,17 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .header h1::after {
+            content: '📸✨';
+            position: absolute;
+            right: -50px;
+            top: 0;
+            font-size: 1rem;
+            opacity: 0.8;
         }
 
         .header p {
