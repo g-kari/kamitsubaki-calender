@@ -140,7 +140,9 @@ async function fetchKamitsubakiEvents() {
                         description: '', // Could be extracted from content
                         tags: [], // Could be auto-generated based on title/performers
                         status: '',
-                        url: eventUrl
+                        url: eventUrl,
+                        image: null, // Will be populated if available
+                        access: null // Will be populated with venue details if available
                     });
                     
                     console.log(`Extracted event ${index + 1}: ${title} at ${venue} on ${eventDate}`);
