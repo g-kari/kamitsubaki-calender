@@ -1,114 +1,114 @@
 # kamitsubaki-calender
 
-KAMITSUBAKI Studio event calendar built with React.js and automatic daily updates via GitHub Actions.
+React.js とGitHub Actions による自動日次更新機能を持つKAMITSUBAKI Studio イベントカレンダーです。
 
-## Features
+## 機能
 
-- 🌸 Display events from KAMITSUBAKI Studio artists
-- 🔄 Automatic daily updates via GitHub Actions
-- 📱 Responsive design for mobile and desktop
-- 🎯 Event filtering and search
-- 📧 Email notification subscription
-- 📊 Event statistics
-- 📅 iCal export support
-- ⚛️ **NEW:** Built with React.js for better performance and maintainability
+- 🌸 KAMITSUBAKI Studio アーティストのイベント表示
+- 🔄 GitHub Actions による自動日次更新
+- 📱 モバイル・デスクトップ対応のレスポンシブデザイン
+- 🎯 イベントのフィルタリングと検索
+- 📧 メール通知の購読
+- 📊 イベント統計
+- 📅 iCalエクスポート対応
+- ⚛️ **新機能:** パフォーマンスと保守性を向上させるReact.js製
 
-## How it works
+## 仕組み
 
-This calendar solves CORS (Cross-Origin Resource Sharing) issues by using GitHub Actions to fetch event data from external sources and store it locally. The application is now built with React.js for better component organization and state management:
+このカレンダーは、GitHub Actions を使用して外部ソースからイベントデータを取得し、ローカルに保存することでCORS（クロスオリジンリソースシェアリング）問題を解決しています。現在はReact.js を使用してより良いコンポーネント構成と状態管理を実現しています：
 
-1. **GitHub Action** (`/.github/workflows/update-events.yml`) runs daily at 9:00 AM JST
-2. **Fetch Script** (`/scripts/fetch-events.js`) attempts to retrieve latest event data from KAMITSUBAKI's official website
-3. **Local Storage** (`/data/events.json`) stores the fetched event data
-4. **React Build** The GitHub Action builds the React application and updates the static files
-5. **Web Application** (`index.html`) serves the React-powered calendar that loads event data from the local JSON file
+1. **GitHub Action** (`/.github/workflows/update-events.yml`) が日本時間午前9時に毎日実行
+2. **取得スクリプト** (`/scripts/fetch-events.js`) がKAMITSUBAKI公式サイトから最新のイベントデータを取得
+3. **ローカルストレージ** (`/data/events.json`) に取得したイベントデータを保存
+4. **React ビルド** GitHub Action が React アプリケーションをビルドし、静的ファイルを更新
+5. **Webアプリケーション** (`index.html`) がローカルJSONファイルからイベントデータを読み込むReact製カレンダーを提供
 
-## Setup
+## セットアップ
 
-The application now requires Node.js and npm for development. The built application works out of the box with the provided initial event data. The GitHub Action will automatically update the event data and rebuild the React application daily.
+このアプリケーションは開発にNode.js とnpmが必要です。ビルド済みアプリケーションは、提供されている初期イベントデータですぐに動作します。GitHub Action が毎日自動的にイベントデータを更新し、React アプリケーションを再ビルドします。
 
-### Development Setup
+### 開発環境のセットアップ
 
 ```bash
-# Install dependencies
+# 依存関係をインストール
 npm install
 
-# Start development server
+# 開発サーバーを開始
 npm run dev
 
-# Build for production
+# 本番用ビルド
 npm run build
 ```
 
-### Manual Testing
+### 手動テスト
 
-To manually run the update script:
+更新スクリプトを手動で実行するには：
 
 ```bash
 npm install cheerio node-fetch@2
 node scripts/fetch-events.js
 ```
 
-### Building and Deployment
+### ビルドとデプロイ
 
-The application is automatically built and deployed via GitHub Actions. For manual deployment:
+アプリケーションは GitHub Actions によって自動的にビルド・デプロイされます。手動デプロイの場合：
 
 ```bash
-# Build the React application
+# React アプリケーションをビルド
 npm run build
 
-# Copy build artifacts to root (for GitHub Pages)
+# ビルド成果物をルートにコピー（GitHub Pages用）
 cp dist/index-react.html index.html
 cp -r dist/assets assets/
 ```
 
-## Contributing
+## 貢献について
 
-### Pull Request Requirements
+### プルリクエスト要件
 
-**📸 Screenshots Required**
+**📸 スクリーンショットが必要**
 
-When submitting pull requests that modify the user interface, you **must** include screenshots:
+ユーザーインターフェースを変更するプルリクエストを提出する際は、**必ず**スクリーンショットを含める必要があります：
 
-- **Before**: Screenshot showing the current state (if applicable)
-- **After**: Screenshot showing your changes (required)
+- **変更前**: 現在の状態を示すスクリーンショット（該当する場合）
+- **変更後**: 変更内容を示すスクリーンショット（必須）
 
-This helps reviewers understand the visual impact of your changes and ensures quality control for the user interface.
+これにより、レビュアーが変更の視覚的影響を理解し、ユーザーインターフェースの品質管理を確保できます。
 
-The pull request template will guide you through the required information and screenshot format.
+プルリクエストテンプレートが必要な情報とスクリーンショット形式をガイドします。
 
-### Guidelines
+### ガイドライン
 
-- Follow existing code style and structure
-- Test changes across different browsers when possible
-- Include appropriate comments for new features
-- Ensure responsive design works on mobile and desktop
-- **Read the [Screenshot Guide](.github/SCREENSHOT_GUIDE.md)** for detailed instructions on capturing and uploading screenshots
+- 既存のコードスタイルと構造に従う
+- 可能であれば異なるブラウザでの変更をテストする
+- 新機能には適切なコメントを含める
+- モバイルとデスクトップでレスポンシブデザインが動作することを確認する
+- **[スクリーンショットガイド](.github/SCREENSHOT_GUIDE.md)を読む** - スクリーンショットの撮影とアップロードの詳細な手順
 
-## Files
+## ファイル
 
-### React Application
-- `src/App.jsx` - Main React application component
-- `src/components/` - React components (Header, EventCard, CalendarView, etc.)
-- `src/App.css` - Styling for the React application
-- `package.json` - Node.js dependencies and build scripts
-- `vite.config.js` - Vite build configuration
+### React アプリケーション
+- `src/App.jsx` - メインのReactアプリケーションコンポーネント
+- `src/components/` - Reactコンポーネント (Header, EventCard, CalendarView等)
+- `src/App.css` - Reactアプリケーションのスタイリング
+- `package.json` - Node.js依存関係とビルドスクリプト
+- `vite.config.js` - Viteビルド設定
 
-### Legacy & Build
-- `index-vanilla.html` - Original vanilla HTML/JS implementation (preserved)
-- `index.html` - Built React application (auto-generated)
-- `assets/` - Build artifacts (auto-generated)
+### レガシー & ビルド
+- `index-vanilla.html` - 元のバニラHTML/JS実装（保持）
+- `index.html` - ビルドされたReactアプリケーション（自動生成）
+- `assets/` - ビルド成果物（自動生成）
 
-### Data & Actions
-- `.github/workflows/update-events.yml` - GitHub Actions workflow for daily updates and React builds  
-- `.github/pull_request_template.md` - Pull request template with screenshot requirements
-- `scripts/fetch-events.js` - Node.js script to fetch event data
-- `data/events.json` - Local event data storage
-- `public/data/events.json` - Public event data for React app
+### データ & アクション
+- `.github/workflows/update-events.yml` - 毎日の更新とReactビルドのためのGitHub Actionsワークフロー  
+- `.github/pull_request_template.md` - スクリーンショット要件付きプルリクエストテンプレート
+- `scripts/fetch-events.js` - イベントデータを取得するNode.jsスクリプト
+- `data/events.json` - ローカルイベントデータストレージ
+- `public/data/events.json` - Reactアプリ用のパブリックイベントデータ
 
-### Configuration
-- `.gitignore` - Excludes node_modules and build artifacts (but preserves essential files)
+### 設定
+- `.gitignore` - node_modulesとビルド成果物を除外（ただし必要なファイルは保持）
 
-## License
+## ライセンス
 
-MIT License - see LICENSE file for details.
+MIT License - 詳細はLICENSEファイルを参照してください。

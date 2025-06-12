@@ -72,7 +72,7 @@ function App() {
       setFilteredEvents(eventsWithTags)
       setLastUpdateTime(new Date(data.lastUpdated))
     } catch (error) {
-      console.error('Failed to load events:', error)
+      console.error('イベントの読み込みに失敗しました:', error)
       setError('イベントデータの読み込みに失敗しました')
       // Load fallback events
       loadFallbackEvents()
