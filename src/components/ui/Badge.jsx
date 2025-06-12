@@ -9,7 +9,7 @@ function Badge({ children, variant = 'secondary', className = '' }) {
   }
   
   return (
-    <span className={`ui-badge ${variantClasses[variant]} ${className}`}>
+    <span className={`ui-badge ${variantClasses[variant] || variantClasses.secondary} ${className}`}>
       {children}
     </span>
   )
