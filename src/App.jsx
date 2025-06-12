@@ -23,13 +23,41 @@ function App() {
   const fetchKamitsubakiEvents = useCallback(async () => {
     try {
       const response = await fetch('./data/events.json')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
       const data = await response.json()
       return data.events || []
     } catch (error) {
       console.error('Failed to fetch events:', error)
-      return []
+      // Return fallback events if fetch fails
+      return getFallbackEvents()
     }
   }, [])
+
+  // Fallback events for when data fetch fails
+  const getFallbackEvents = () => {
+    return [
+      {
+        id: 'fallback-1',
+        title: 'イベント情報取得中...',
+        date: new Date().toISOString().split('T')[0],
+        time: '00:00',
+        endTime: '00:00',
+        venue: 'データ読み込み中',
+        address: '',
+        performers: 'KAMITSUBAKI Studio',
+        category: 'system',
+        ticketInfo: 'しばらくお待ちください',
+        description: 'イベント情報を取得しています',
+        tags: ['システム'],
+        status: '',
+        url: '',
+        image: null,
+        access: null
+      }
+    ]
+  }
 
   // Auto-generate tags for events
   const autoGenerateTags = useCallback((event) => {
@@ -184,6 +212,69 @@ function App() {
     setTimeout(() => setErrorMessage(''), 5000)
   }, [])
 
+  // Export functionality
+  const exportToIcal = useCallback(() => {
+    const icalEvents = events.map(event => {
+      const startDate = new Date(`${event.date}T${event.time}:00`)
+      const endDate = new Date(startDate.getTime() + 2 * 60 * 60 * 1000) // Default 2 hours duration
+      
+      return [
+        'BEGIN:VEVENT',
+        `UID:${event.id}@kamitsubaki-calendar`,
+        `DTSTART:${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+        `DTEND:${endDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+        `SUMMARY:${event.title}`,
+        `LOCATION:${event.venue}`,
+        `DESCRIPTION:${event.description || event.performers}`,
+        'END:VEVENT'
+      ].join('\n')
+    }).join('\n')
+
+    const icalContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//KAMITSUBAKI Calendar//JP',
+      'CALSCALE:GREGORIAN',
+      icalEvents,
+      'END:VCALENDAR'
+    ].join('\n')
+
+    const blob = new Blob([icalContent], { type: 'text/calendar;charset=utf-8' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = 'kamitsubaki_events.ics'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    showSuccessMessage('iCalendarファイルをダウンロードしました')
+  }, [events, showSuccessMessage])
+
+  const exportToCsv = useCallback(() => {
+    const csvData = events.map(event => [
+      event.title,
+      event.date,
+      event.time,
+      event.venue,
+      event.performers,
+      event.status
+    ])
+    
+    const csvContent = "data:text/csv;charset=utf-8," + 
+      "タイトル,日付,時間,会場,出演者,ステータス\n" +
+      csvData.map(row => row.map(field => `"${field}"`).join(",")).join("\n")
+    
+    const encodedUri = encodeURI(csvContent)
+    const link = document.createElement("a")
+    link.setAttribute("href", encodedUri)
+    link.setAttribute("download", "kamitsubaki_events.csv")
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    showSuccessMessage('CSVファイルをダウンロードしました（Googleスプレッドシートで開けます）')
+  }, [events, showSuccessMessage])
+
   // Calculate stats
   const stats = {
     totalEvents: events.length,
@@ -222,6 +313,53 @@ function App() {
     
     initializeApp()
   }, [fetchKamitsubakiEvents, autoGenerateTags, updateEvents])
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.ctrlKey || event.metaKey) {
+        switch (event.key) {
+          case 'r':
+            event.preventDefault()
+            updateEvents()
+            break
+          case 'f':
+            event.preventDefault()
+            // Focus search input
+            const searchInput = document.querySelector('.search-input')
+            if (searchInput) searchInput.focus()
+            break
+          case 's':
+            event.preventDefault()
+            // Export functionality could be added here
+            break
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [updateEvents])
+
+  // Page visibility change handler
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && lastUpdateTime) {
+        const timeSinceUpdate = Date.now() - lastUpdateTime.getTime()
+        // Auto-update if more than 10 minutes have passed
+        if (timeSinceUpdate > 10 * 60 * 1000) {
+          updateEvents()
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [lastUpdateTime, updateEvents])
 
   // Apply filters when dependencies change
   useEffect(() => {
@@ -385,6 +523,20 @@ function App() {
         </div>
       </div>
 
+      {/* Export Section */}
+      <div className="export-section">
+        <h3>📁 エクスポート</h3>
+        <p>イベント情報をファイルとしてエクスポートできます</p>
+        <div className="export-buttons">
+          <button className="export-btn" onClick={exportToIcal}>
+            📅 iCalendar (.ics)
+          </button>
+          <button className="export-btn" onClick={exportToCsv}>
+            📊 CSV形式
+          </button>
+        </div>
+      </div>
+
       {/* Events Display */}
       <EventsDisplay 
         events={filteredEvents}
@@ -434,7 +586,40 @@ function ListView({ events, onEventClick }) {
 
 // Event Card Component
 function EventCard({ event, onClick }) {
+  const [countdown, setCountdown] = useState('')
   const isNew = event.status === 'NEW!'
+  
+  // Update countdown timer
+  useEffect(() => {
+    const updateCountdown = () => {
+      const eventDateTime = new Date(`${event.date}T${event.time}:00`)
+      const now = new Date()
+      const diff = eventDateTime.getTime() - now.getTime()
+      
+      if (diff > 0) {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+        
+        if (days > 0) {
+          setCountdown(`${days}日${hours}時間後`)
+        } else if (hours > 0) {
+          setCountdown(`${hours}時間${minutes}分後`)
+        } else if (minutes > 0) {
+          setCountdown(`${minutes}分後`)
+        } else {
+          setCountdown('まもなく開始')
+        }
+      } else {
+        setCountdown('')
+      }
+    }
+
+    updateCountdown()
+    const interval = setInterval(updateCountdown, 60000) // Update every minute
+    
+    return () => clearInterval(interval)
+  }, [event.date, event.time])
   
   return (
     <div className={`event-card ${isNew ? 'new' : ''}`} onClick={onClick}>
@@ -453,6 +638,12 @@ function EventCard({ event, onClick }) {
           <strong>🎭 出演:</strong> {event.performers}
         </div>
       </div>
+
+      {countdown && (
+        <div className="countdown-timer">
+          ⏰ {countdown}
+        </div>
+      )}
 
       {event.tags && event.tags.length > 0 && (
         <div className="event-tags">

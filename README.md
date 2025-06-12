@@ -1,6 +1,6 @@
 # kamitsubaki-calender
 
-KAMITSUBAKI Studio event calendar with automatic daily updates via GitHub Actions.
+KAMITSUBAKI Studio event calendar with automatic daily updates via GitHub Actions. **Now built with React.js!**
 
 ## Features
 
@@ -8,31 +8,72 @@ KAMITSUBAKI Studio event calendar with automatic daily updates via GitHub Action
 - 🔄 Automatic daily updates via GitHub Actions
 - 📱 Responsive design for mobile and desktop
 - 🎯 Event filtering and search
-- 📧 Email notification subscription
+- 📧 Browser notification support
 - 📊 Event statistics
-- 📅 iCal export support
+- 📅 iCal and CSV export support
+- ⚛️ Modern React.js interface
+- 🚀 Fast Vite build system
+- 📦 Component-based architecture
 
 ## How it works
 
-This calendar solves CORS (Cross-Origin Resource Sharing) issues by using GitHub Actions to fetch event data from external sources and store it locally:
+This calendar is now a React.js application that solves CORS (Cross-Origin Resource Sharing) issues by using GitHub Actions to fetch event data from external sources and serve it statically:
 
 1. **GitHub Action** (`/.github/workflows/update-events.yml`) runs daily at 9:00 AM JST
 2. **Fetch Script** (`/scripts/fetch-events.js`) attempts to retrieve latest event data from KAMITSUBAKI's official website
-3. **Local Storage** (`/data/events.json`) stores the fetched event data
-4. **Web Application** (`index.html`) loads event data from the local JSON file instead of making cross-origin requests
+3. **Local Storage** (`/public/data/events.json`) stores the fetched event data
+4. **React Application** loads event data from the local JSON file instead of making cross-origin requests
+5. **GitHub Pages** serves the built React application
+
+## Architecture
+
+### React Components
+- `App.jsx` - Main application with state management
+- `EventsDisplay` - Wrapper for different view modes
+- `ListView` - Event list display with cards
+- `CalendarView` - Calendar grid interface
+- `EventCard` - Individual event card with countdown timer
+- `EventModal` - Detailed event information modal
+
+### Build System
+- **Vite** - Fast build tool and development server
+- **React 18** - Modern React with hooks
+- **ESLint** - Code linting
+- **CSS** - Original styling preserved
+
+### Deployment
+The application builds to static files and deploys automatically to GitHub Pages when event data is updated.
 
 ## Setup
 
-The application works out of the box with the provided initial event data. The GitHub Action will automatically update the event data daily.
+### Development
 
-### Manual Testing
+To run the React application locally:
 
-To manually run the update script:
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+```
+
+### Event Data Update
+
+To manually update event data:
 
 ```bash
 npm install cheerio node-fetch@2
 node scripts/fetch-events.js
 ```
+
+The application works out of the box with the provided initial event data. The GitHub Action will automatically update the event data daily and deploy the updated React app to GitHub Pages.
 
 ## Contributing
 
@@ -59,12 +100,26 @@ The pull request template will guide you through the required information and sc
 
 ## Files
 
-- `index.html` - Main web application
-- `.github/workflows/update-events.yml` - GitHub Actions workflow for daily updates  
-- `.github/pull_request_template.md` - Pull request template with screenshot requirements
+### React Application
+- `src/App.jsx` - Main React application component
+- `src/main.jsx` - React application entry point
+- `src/index.css` - Global styles (preserved from original)
+- `src/App.css` - Component-specific styles
+- `index.html` - HTML template for React app
+- `package.json` - Node.js dependencies and scripts
+- `vite.config.js` - Vite build configuration
+- `eslint.config.js` - ESLint configuration
+
+### Data & Deployment
+- `.github/workflows/update-events.yml` - GitHub Actions workflow for daily updates and deployment
 - `scripts/fetch-events.js` - Node.js script to fetch event data
-- `data/events.json` - Local event data storage
-- `.gitignore` - Excludes node_modules and package files (installed by GitHub Actions)
+- `public/data/events.json` - Event data served statically
+- `dist/` - Built React application (generated)
+
+### Legacy & Documentation
+- `index-original.html` - Original vanilla JavaScript version (preserved for reference)
+- `.github/pull_request_template.md` - Pull request template with screenshot requirements
+- `.gitignore` - Git ignore configuration
 
 ## License
 
