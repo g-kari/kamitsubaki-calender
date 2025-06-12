@@ -14,7 +14,7 @@ function Header() {
           </div>
         </div>
         <div className="header-right">
-          <div className="header-brand">W✕W</div>
+          <div className="header-brand">W×W</div>
           <div className="header-tagline">Virtual Witch Phenomenon</div>
         </div>
       </div>

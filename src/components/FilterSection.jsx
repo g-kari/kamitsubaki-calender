@@ -8,10 +8,7 @@ function FilterSection({
   onViewModeChange,
   onDateFilterChange,
   onArtistFilterChange,
-  onSearchInputChange,
-  currentCalendarDate,
-  onPreviousMonth,
-  onNextMonth
+  onSearchInputChange
 }) {
   const monthNames = [
     '1月', '2月', '3月', '4月', '5月', '6月',
@@ -30,8 +27,8 @@ function FilterSection({
               value={viewMode}
               onChange={(e) => onViewModeChange(e.target.value)}
             >
-              <option value="grid">グリッド表示</option>
               <option value="calendar">カレンダー表示</option>
+              <option value="events">イベント一覧</option>
             </select>
           </div>
           <div className="filter-group">
@@ -76,22 +73,6 @@ function FilterSection({
           </div>
         </div>
       </div>
-
-      {viewMode === 'calendar' && (
-        <div className="calendar-navigation">
-          <div className="calendar-nav-controls">
-            <button className="nav-btn" onClick={onPreviousMonth}>
-              ← 前月
-            </button>
-            <h2 id="currentMonthYear">
-              {currentCalendarDate.getFullYear()}年{monthNames[currentCalendarDate.getMonth()]}
-            </h2>
-            <button className="nav-btn" onClick={onNextMonth}>
-              次月 →
-            </button>
-          </div>
-        </div>
-      )}
     </>
   )
 }

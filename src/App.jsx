@@ -6,6 +6,8 @@ import StatsSection from './components/StatsSection'
 import SubscriptionSection from './components/SubscriptionSection'
 import FilterSection from './components/FilterSection'
 import EventsDisplay from './components/EventsDisplay'
+import Calendar from './components/Calendar'
+import EventList from './components/EventList'
 import EventModal from './components/EventModal'
 import NotificationBadge from './components/NotificationBadge'
 
@@ -15,7 +17,7 @@ function App() {
   const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(false)
   const [lastUpdateTime, setLastUpdateTime] = useState(null)
   const [subscribers, setSubscribers] = useState([])
-  const [currentViewMode, setCurrentViewMode] = useState('grid')
+  const [currentViewMode, setCurrentViewMode] = useState('calendar')
   const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date())
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -330,17 +332,19 @@ function App() {
         onDateFilterChange={setDateFilter}
         onArtistFilterChange={setArtistFilter}
         onSearchInputChange={setSearchInput}
-        currentCalendarDate={currentCalendarDate}
-        onPreviousMonth={() => setCurrentCalendarDate(new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() - 1, 1))}
-        onNextMonth={() => setCurrentCalendarDate(new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() + 1, 1))}
       />
       
-      <EventsDisplay
-        events={filteredEvents}
-        viewMode={currentViewMode}
-        currentCalendarDate={currentCalendarDate}
-        onEventClick={setSelectedEvent}
-      />
+      {currentViewMode === 'calendar' ? (
+        <Calendar
+          events={filteredEvents}
+          onEventClick={setSelectedEvent}
+        />
+      ) : (
+        <EventList
+          events={filteredEvents}
+          onEventClick={setSelectedEvent}
+        />
+      )}
       
       {selectedEvent && (
         <EventModal
