@@ -1,0 +1,210 @@
+name: Automated PR Screenshots
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'index.html'
+      - '**/*.css'
+      - '**/*.js'
+      - 'data/events.json'
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+    - name: Checkout PR branch
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history to compare with base branch
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: |
+        npm install cheerio node-fetch@2 playwright
+        
+    - name: Install Playwright browsers
+      run: npx playwright install --with-deps chromium
+      
+    - name: Create screenshots directory
+      run: mkdir -p screenshots
+      
+    - name: Start local server for PR branch (After)
+      run: |
+        cd $GITHUB_WORKSPACE
+        python3 -m http.server 8080 &
+        echo $! > server.pid
+        sleep 5
+        
+    - name: Take "After" screenshot (PR branch)
+      run: |
+        node -e "
+        const { chromium } = require('playwright');
+        (async () => {
+          const browser = await chromium.launch({ headless: true });
+          const context = await browser.newContext();
+          
+          // Desktop screenshot
+          const desktopPage = await context.newPage();
+          await desktopPage.setViewportSize({ width: 1280, height: 720 });
+          await desktopPage.goto('http://localhost:8080', { waitUntil: 'networkidle', timeout: 30000 });
+          await desktopPage.screenshot({ path: 'screenshots/after-desktop.png', fullPage: true });
+          
+          // Mobile screenshot  
+          const mobilePage = await context.newPage();
+          await mobilePage.setViewportSize({ width: 375, height: 667 });
+          await mobilePage.goto('http://localhost:8080', { waitUntil: 'networkidle', timeout: 30000 });
+          await mobilePage.screenshot({ path: 'screenshots/after-mobile.png', fullPage: true });
+          
+          await browser.close();
+          console.log('After screenshots completed');
+        })().catch(console.error);
+        "
+        
+    - name: Stop server
+      run: |
+        if [ -f server.pid ]; then
+          kill $(cat server.pid) || true
+          rm server.pid
+        fi
+        
+    - name: Checkout base branch for "Before" screenshot
+      run: |
+        git checkout ${{ github.event.pull_request.base.sha }}
+        
+    - name: Start local server for base branch (Before)
+      run: |
+        cd $GITHUB_WORKSPACE
+        python3 -m http.server 8081 &
+        echo $! > server_base.pid
+        sleep 5
+        
+    - name: Take "Before" screenshot (Base branch)
+      run: |
+        node -e "
+        const { chromium } = require('playwright');
+        (async () => {
+          try {
+            const browser = await chromium.launch({ headless: true });
+            const context = await browser.newContext();
+            
+            // Desktop screenshot
+            const desktopPage = await context.newPage();
+            await desktopPage.setViewportSize({ width: 1280, height: 720 });
+            await desktopPage.goto('http://localhost:8081', { waitUntil: 'networkidle', timeout: 30000 });
+            await desktopPage.screenshot({ path: 'screenshots/before-desktop.png', fullPage: true });
+            
+            // Mobile screenshot  
+            const mobilePage = await context.newPage();
+            await mobilePage.setViewportSize({ width: 375, height: 667 });
+            await mobilePage.goto('http://localhost:8081', { waitUntil: 'networkidle', timeout: 30000 });
+            await mobilePage.screenshot({ path: 'screenshots/before-mobile.png', fullPage: true });
+            
+            await browser.close();
+            console.log('Before screenshots completed');
+          } catch (error) {
+            console.log('Before screenshots failed (may be first PR):', error.message);
+          }
+        })().catch(console.error);
+        "
+        
+    - name: Stop base server
+      run: |
+        if [ -f server_base.pid ]; then
+          kill $(cat server_base.pid) || true
+          rm server_base.pid
+        fi
+        
+    - name: Upload screenshots as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: pr-screenshots
+        path: screenshots/
+        retention-days: 30
+        
+    - name: Upload screenshots and comment on PR
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Check which screenshots exist
+          const screenshotDir = 'screenshots';
+          const screenshots = {
+            afterDesktop: fs.existsSync(path.join(screenshotDir, 'after-desktop.png')),
+            afterMobile: fs.existsSync(path.join(screenshotDir, 'after-mobile.png')),
+            beforeDesktop: fs.existsSync(path.join(screenshotDir, 'before-desktop.png')),
+            beforeMobile: fs.existsSync(path.join(screenshotDir, 'before-mobile.png'))
+          };
+          
+          console.log('Screenshot status:', screenshots);
+          
+          const runUrl = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
+          
+          let comment = [
+            '## 📸 自動スクリーンショット / Automated Screenshots',
+            '',
+            'このPRのUIの変更が自動でキャプチャされました。',
+            'UI changes in this PR have been automatically captured.',
+            '',
+            `🔗 **[スクリーンショットをダウンロード / Download Screenshots](${runUrl})**`,
+            '',
+          ];
+          
+          // Add before screenshots
+          if (screenshots.beforeDesktop || screenshots.beforeMobile) {
+            comment.push('### 修正前 / Before');
+            comment.push('');
+            
+            if (screenshots.beforeDesktop) {
+              comment.push('**デスクトップ / Desktop (1280x720)**');
+              comment.push('`before-desktop.png` - スクリーンショットは上記のリンクからダウンロードしてください。');
+              comment.push('');
+            }
+            
+            if (screenshots.beforeMobile) {
+              comment.push('**モバイル / Mobile (375x667)**');
+              comment.push('`before-mobile.png` - スクリーンショットは上記のリンクからダウンロードしてください。');
+              comment.push('');
+            }
+          }
+          
+          // Add after screenshots
+          comment.push('### 修正後 / After');
+          comment.push('');
+          
+          if (screenshots.afterDesktop) {
+            comment.push('**デスクトップ / Desktop (1280x720)**');
+            comment.push('`after-desktop.png` - スクリーンショットは上記のリンクからダウンロードしてください。');
+            comment.push('');
+          }
+          
+          if (screenshots.afterMobile) {
+            comment.push('**モバイル / Mobile (375x667)**');
+            comment.push('`after-mobile.png` - スクリーンショットは上記のリンクからダウンロードしてください。');
+            comment.push('');
+          }
+          
+          comment.push('---');
+          comment.push('🤖 このスクリーンショットは自動生成されました');
+          comment.push('🤖 These screenshots were automatically generated');
+          comment.push('');
+          comment.push('### ファイル一覧 / File List:');
+          if (screenshots.beforeDesktop) comment.push('- ✅ `before-desktop.png`');
+          if (screenshots.beforeMobile) comment.push('- ✅ `before-mobile.png`');
+          if (screenshots.afterDesktop) comment.push('- ✅ `after-desktop.png`');
+          if (screenshots.afterMobile) comment.push('- ✅ `after-mobile.png`');
+          
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: comment.join('\n')
+          });
