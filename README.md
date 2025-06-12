@@ -2,6 +2,8 @@
 
 React.js とGitHub Actions による自動日次更新機能を持つKAMITSUBAKI Studio イベントカレンダーです。
 
+🌐 **ライブサイト**: [https://g-kari.github.io/kamitsubaki-calender/](https://g-kari.github.io/kamitsubaki-calender/)
+
 ## 機能
 
 - 🌸 KAMITSUBAKI Studio アーティストのイベント表示
@@ -15,17 +17,26 @@ React.js とGitHub Actions による自動日次更新機能を持つKAMITSUBAKI
 
 ## 仕組み
 
-このカレンダーは、GitHub Actions を使用して外部ソースからイベントデータを取得し、ローカルに保存することでCORS（クロスオリジンリソースシェアリング）問題を解決しています。現在はReact.js を使用してより良いコンポーネント構成と状態管理を実現しています：
+このカレンダーは、GitHub Actions を使用して外部ソースからイベントデータを取得し、ローカルに保存することでCORS（クロスオリジンリソースシェアリング）問題を解決しています。現在はReact.js を使用してより良いコンポーネント構成と状態管理を実現し、GitHub Pages で自動デプロイされています：
 
 1. **GitHub Action** (`/.github/workflows/update-events.yml`) が日本時間午前9時に毎日実行
 2. **取得スクリプト** (`/scripts/fetch-events.js`) がKAMITSUBAKI公式サイトから最新のイベントデータを取得
 3. **ローカルストレージ** (`/data/events.json`) に取得したイベントデータを保存
 4. **React ビルド** GitHub Action が React アプリケーションをビルドし、静的ファイルを更新
-5. **Webアプリケーション** (`index.html`) がローカルJSONファイルからイベントデータを読み込むReact製カレンダーを提供
+5. **GitHub Pages デプロイ** (`/.github/workflows/deploy-pages.yml`) が main ブランチへの push 時に自動実行
+6. **Webアプリケーション** GitHub Pages でホストされる React 製カレンダーがローカル JSON ファイルからイベントデータを読み込み
 
 ## セットアップ
 
-このアプリケーションは開発にNode.js とnpmが必要です。ビルド済みアプリケーションは、提供されている初期イベントデータですぐに動作します。GitHub Action が毎日自動的にイベントデータを更新し、React アプリケーションを再ビルドします。
+このアプリケーションは開発にNode.js とnpmが必要です。GitHub Pages で自動デプロイされたライブサイトは [https://g-kari.github.io/kamitsubaki-calender/](https://g-kari.github.io/kamitsubaki-calender/) でアクセスできます。
+
+### 本番デプロイ（GitHub Pages）
+
+本プロジェクトは GitHub Pages を使用して自動デプロイされます：
+
+- **ライブサイト**: [https://g-kari.github.io/kamitsubaki-calender/](https://g-kari.github.io/kamitsubaki-calender/)
+- **自動デプロイ**: main ブランチへの push 時に `.github/workflows/deploy-pages.yml` が実行
+- **イベントデータ更新**: 毎日午前9時（JST）に `.github/workflows/update-events.yml` が実行
 
 ### 開発環境のセットアップ
 
@@ -51,16 +62,28 @@ node scripts/fetch-events.js
 
 ### ビルドとデプロイ
 
-アプリケーションは GitHub Actions によって自動的にビルド・デプロイされます。手動デプロイの場合：
+#### GitHub Pages（推奨）
+
+本プロジェクトは GitHub Pages で自動デプロイされます：
+
+1. main ブランチに変更をプッシュ
+2. `.github/workflows/deploy-pages.yml` が自動実行
+3. Vite でビルドし、GitHub Pages にデプロイ
+4. [https://g-kari.github.io/kamitsubaki-calender/](https://g-kari.github.io/kamitsubaki-calender/) でライブサイトにアクセス可能
+
+#### 手動デプロイ
+
+手動でビルドする場合：
 
 ```bash
 # React アプリケーションをビルド
 npm run build
 
-# ビルド成果物をルートにコピー（GitHub Pages用）
-cp dist/index-react.html index.html
-cp -r dist/assets assets/
+# ビルド成果物を確認
+ls dist/
 ```
+
+**注意**: GitHub Pages デプロイは自動化されているため、通常は手動デプロイは不要です。
 
 ## 貢献について
 
@@ -100,7 +123,8 @@ cp -r dist/assets assets/
 - `assets/` - ビルド成果物（自動生成）
 
 ### データ & アクション
-- `.github/workflows/update-events.yml` - 毎日の更新とReactビルドのためのGitHub Actionsワークフロー  
+- `.github/workflows/update-events.yml` - 毎日の更新とReactビルドのためのGitHub Actionsワークフロー
+- `.github/workflows/deploy-pages.yml` - GitHub Pages自動デプロイワークフロー
 - `.github/pull_request_template.md` - スクリーンショット要件付きプルリクエストテンプレート
 - `scripts/fetch-events.js` - イベントデータを取得するNode.jsスクリプト
 - `data/events.json` - ローカルイベントデータストレージ
