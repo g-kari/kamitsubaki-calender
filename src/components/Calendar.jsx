@@ -104,7 +104,7 @@ function Calendar({ events, onEventClick }) {
               </div>
             ))}
             
-            {Array.from({ length: firstDayOfMonth }, (_, i) => (
+            {Array.from({ length: (firstDayOfMonth + 6) % 7 }, (_, i) => (
               <div key={`empty-${i}`} className="v0-calendar-day-cell"></div>
             ))}
 
