@@ -1,4 +1,4 @@
-name: Update Event Data
+name: Update Event Data and Deploy
 
 on:
   schedule:
@@ -7,9 +7,9 @@ on:
   workflow_dispatch: # Allow manual trigger
 
 jobs:
-  update-events:
+  update-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 10 # Add timeout for the entire job
+    timeout-minutes: 15 # Add timeout for the entire job
     
     steps:
     - name: Checkout repository
@@ -20,7 +20,7 @@ jobs:
       with:
         node-version: '18'
         
-    - name: Install dependencies
+    - name: Install event fetching dependencies
       run: |
         npm install cheerio node-fetch@2
         
@@ -43,8 +43,24 @@ jobs:
           echo "Invalid JSON, restoring from git"
           git checkout HEAD -- data/events.json || echo "No previous version available"
         fi
+
+    - name: Copy data to public directory
+      run: |
+        cp -r data public/
         
-    - name: Commit and push changes
+    - name: Install React app dependencies
+      run: npm install
+      
+    - name: Build React app
+      run: npm run build
+      
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
+        
+    - name: Commit and push event data changes
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"

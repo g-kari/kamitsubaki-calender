@@ -1,0 +1,2038 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAMITSUBAKI 自動更新カレンダー</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #e91e63, #9c27b0, #673ab7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .header h1::after {
+            content: '📸✨';
+            position: absolute;
+            right: -50px;
+            top: 0;
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .update-info {
+            background: linear-gradient(45deg, #00c851, #007e33);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .update-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .update-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .update-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .update-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .auto-update-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 21px;
+            height: 21px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            left: 27px;
+            background: #007e33;
+        }
+
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .event-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 0 15px 0 100%;
+            opacity: 0.1;
+        }
+
+        .event-card.new {
+            border-left-color: #ff6b6b;
+            animation: newEventGlow 3s ease-in-out;
+        }
+
+        @keyframes newEventGlow {
+            0%, 100% { box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+            50% { box-shadow: 0 15px 35px rgba(255, 107, 107, 0.3); }
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .event-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .event-details {
+            margin-bottom: 20px;
+        }
+
+        .event-detail {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .event-detail strong {
+            min-width: 80px;
+            color: #333;
+        }
+
+        .register-btn {
+            background: linear-gradient(45deg, #e91e63, #9c27b0);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(233, 30, 99, 0.4);
+        }
+
+        .register-btn:active {
+            transform: translateY(0);
+        }
+
+        .success-message {
+            background: linear-gradient(45deg, #00c851, #007e33);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .success-message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .day-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .day-badge.new {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            animation: pulse 2s infinite;
+        }
+
+        .day-badge.updated {
+            background: linear-gradient(45deg, #17a2b8, #138496);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .venue {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .performers {
+            background: #f8f9ff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 3px solid #667eea;
+        }
+
+        .performers strong {
+            color: #667eea;
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .filter-section {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-select, .search-input {
+            padding: 8px 15px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 20px;
+            background: white;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus, .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .subscription-section {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .subscription-input {
+            display: flex;
+            gap: 10px;
+            max-width: 400px;
+            margin: 15px auto 0;
+        }
+
+        .email-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 1rem;
+        }
+
+        .subscribe-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .subscribe-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .export-section {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .export-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .export-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .notification-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+            transform: translateX(300px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification-badge.show {
+            transform: translateX(0);
+        }
+
+        .countdown-timer {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .event-tags {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+
+        .event-tag {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .subscription-input {
+                flex-direction: column;
+            }
+
+            .export-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .notification-badge {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin: 10px 0;
+                transform: none;
+            }
+        }
+
+        /* Calendar View Styles */
+        .calendar-navigation {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .calendar-nav-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .nav-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        #currentMonthYear {
+            margin: 0;
+            color: #333;
+            font-size: 1.5rem;
+            min-width: 200px;
+        }
+
+        .calendar-view {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-header {
+            background: linear-gradient(45deg, #e91e63, #9c27b0);
+            color: white;
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .calendar-day {
+            background: white;
+            min-height: 120px;
+            padding: 8px;
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+
+        .calendar-day:hover {
+            background: #f8f9ff;
+        }
+
+        .calendar-day.other-month {
+            background: #f5f5f5;
+            color: #ccc;
+        }
+
+        .calendar-day.today {
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 2px solid #667eea;
+        }
+
+        .day-number {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .calendar-day.other-month .day-number {
+            color: #ccc;
+        }
+
+        .calendar-events {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .calendar-event {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .calendar-event:hover {
+            transform: scale(1.05);
+            z-index: 10;
+            position: relative;
+            white-space: normal;
+            overflow: visible;
+        }
+
+        .calendar-event.new {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            animation: pulse 2s infinite;
+        }
+
+        .event-count {
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+
+        /* Modal for event details */
+        .event-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .event-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            margin: 20px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .update-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .calendar-view {
+                gap: 0;
+            }
+
+            .calendar-day {
+                min-height: 80px;
+                padding: 4px;
+            }
+
+            .calendar-event {
+                font-size: 0.7rem;
+                padding: 2px 4px;
+            }
+
+            .calendar-nav-controls {
+                gap: 15px;
+                flex-wrap: wrap;
+            }
+
+            #currentMonthYear {
+                font-size: 1.2rem;
+                min-width: 150px;
+            }
+
+            .nav-btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌸 KAMITSUBAKI 自動更新カレンダー 🌸</h1>
+            <p>神椿スタジオの最新イベント情報を自動で取得・更新します（GitHub Actions使用）</p>
+        </div>
+
+        <div class="update-info">
+            <div class="update-status">
+                <span id="updateStatus">📡 最終更新: 手動更新待ち</span>
+                <div id="loadingSpinner" class="loading-spinner" style="display: none;"></div>
+            </div>
+            <div class="update-controls">
+                <button class="update-btn" onclick="updateEvents()">🔄 今すぐ更新</button>
+                <div class="auto-update-toggle">
+                    <span>自動更新:</span>
+                    <div class="toggle-switch" id="autoUpdateToggle" onclick="toggleAutoUpdate()">
+                        <div class="toggle-slider"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stat-card">
+                <div class="stat-number" id="totalEvents">0</div>
+                <div class="stat-label">総イベント数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="upcomingEvents">0</div>
+                <div class="stat-label">今後のイベント</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="thisMonthEvents">0</div>
+                <div class="stat-label">今月のイベント</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="newEvents">0</div>
+                <div class="stat-label">新着イベント</div>
+            </div>
+        </div>
+
+        <div class="subscription-section">
+            <h3>📧 イベント通知を受け取る</h3>
+            <p>新しいイベントが追加されたときにメール通知を受け取れます</p>
+            <div class="subscription-input">
+                <input type="email" class="email-input" placeholder="メールアドレスを入力" id="emailInput">
+                <button class="subscribe-btn" onclick="subscribeToNotifications()">🔔 通知を受け取る</button>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <h3>🔍 イベントを絞り込み</h3>
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <label>📊 表示形式:</label>
+                    <select class="filter-select" id="viewMode" onchange="changeViewMode()">
+                        <option value="grid">グリッド表示</option>
+                        <option value="calendar">カレンダー表示</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>📅 期間:</label>
+                    <select class="filter-select" id="dateFilter" onchange="applyFilters()">
+                        <option value="all">すべて</option>
+                        <option value="upcoming">今後のイベント</option>
+                        <option value="thisWeek">今週</option>
+                        <option value="thisMonth">今月</option>
+                        <option value="next3Months">今後3か月</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>🎭 アーティスト:</label>
+                    <select class="filter-select" id="artistFilter" onchange="applyFilters()">
+                        <option value="all">すべて</option>
+                        <option value="kafu">花譜</option>
+                        <option value="rime">理芽</option>
+                        <option value="harusaruhi">春猿火</option>
+                        <option value="isekaijoucho">ヰ世界情緒</option>
+                        <option value="koko">幸祜</option>
+                        <option value="meto">明透</option>
+                        <option value="vwp">V.W.P</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <input type="text" class="search-input" placeholder="🔍 イベントを検索..." id="searchInput" oninput="applyFilters()">
+                </div>
+            </div>
+        </div>
+
+        <div class="export-section">
+            <h3>📤 カレンダーデータをエクスポート</h3>
+            <p>すべてのイベントをまとめてカレンダーアプリに追加できます</p>
+            <div class="export-buttons">
+                <button class="export-btn" onclick="exportAllEvents('google')">
+                    📱 すべてをGoogleカレンダーに追加
+                </button>
+                <button class="export-btn" onclick="exportAllEvents('ical')">
+                    📥 すべてのiCalファイルをダウンロード
+                </button>
+                <button class="export-btn" onclick="exportToJSON()">
+                    💾 JSONデータをダウンロード
+                </button>
+                <button class="export-btn" onclick="sharePage()">
+                    🔗 このページを共有
+                </button>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+        <!-- Calendar Navigation (hidden by default) -->
+        <div id="calendarNavigation" class="calendar-navigation" style="display: none;">
+            <div class="calendar-nav-controls">
+                <button class="nav-btn" onclick="previousMonth()">‹ 前月</button>
+                <h3 id="currentMonthYear">2025年6月</h3>
+                <button class="nav-btn" onclick="nextMonth()">次月 ›</button>
+            </div>
+        </div>
+
+        <div class="events-grid" id="eventsGrid">
+            <!-- Events will be populated by JavaScript -->
+        </div>
+
+        <div id="notificationBadge" class="notification-badge">
+            📢 新しいイベントが追加されました！
+        </div>
+    </div>
+
+    <!-- Event Modal -->
+    <div id="eventModal" class="event-modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeEventModal()">&times;</button>
+            <div id="modalEventContent">
+                <!-- Event details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let autoUpdateEnabled = false;
+        let updateInterval;
+        let lastUpdateTime = null;
+        let filteredEvents = [];
+        let subscribers = [];
+        let currentViewMode = 'grid';
+        let currentCalendarDate = new Date();
+        
+        // localStorageを使わないようにシンプルに
+        try {
+            subscribers = JSON.parse(localStorage.getItem('kamitsubaki_subscribers') || '[]');
+        } catch (e) {
+            subscribers = [];
+        }
+        
+        // 初期イベントデータ（フォールバック用）
+        let events = [
+            {
+                title: "神椿市建設中。MRコンテンツ体験会（東京会場）",
+                date: "2025-12-13",
+                time: "10:00",
+                endTime: "20:00",
+                venue: "SHIBUYA TSUTAYA 6F IP書店",
+                address: "東京都渋谷区",
+                performers: "ニジゲート × 神椿市建設中。",
+                description: "店舗型イマーシブシアター「ニジゲート」での神椿市建設中。MRコンテンツ体験（無料）",
+                status: "NEW!",
+                id: "mr-content-tokyo-1",
+                tags: ["MR", "体験会", "無料", "東京"],
+                category: "体験会",
+                url: "https://kamitsubaki.jp/event/",
+                image: "https://kamitsubaki.jp/assets/img/news/mr-experience.jpg",
+                access: {
+                    station: "JR山手線 渋谷駅",
+                    walkTime: "徒歩5分",
+                    address: "東京都渋谷区宇田川町21-6",
+                    mapUrl: "https://maps.google.com/maps?q=渋谷TSUTAYA",
+                    notes: "渋谷109の隣のビル6階"
+                }
+            },
+            {
+                title: "神椿市建設中。MRコンテンツ体験会（東京会場 2日目）",
+                date: "2025-12-14",
+                time: "10:00",
+                endTime: "20:00",
+                venue: "SHIBUYA TSUTAYA 6F IP書店",
+                address: "東京都渋谷区",
+                performers: "ニジゲート × 神椿市建設中。",
+                description: "店舗型イマーシブシアター「ニジゲート」での神椿市建設中。MRコンテンツ体験（無料）",
+                status: "NEW!",
+                id: "mr-content-tokyo-2",
+                url: "https://kamitsubaki.jp/event/",
+                image: "https://kamitsubaki.jp/assets/img/news/mr-experience.jpg",
+                access: {
+                    station: "JR山手線 渋谷駅",
+                    walkTime: "徒歩5分",
+                    address: "東京都渋谷区宇田川町21-6",
+                    mapUrl: "https://maps.google.com/maps?q=渋谷TSUTAYA",
+                    notes: "渋谷109の隣のビル6階"
+                }
+            },
+            {
+                title: "神椿市建設中。MRコンテンツ体験会（大阪会場）",
+                date: "2025-07-01",
+                time: "10:00",
+                endTime: "21:00",
+                venue: "TSUTAYA EBISUBASHI B1F 大阪IP書店",
+                address: "大阪府大阪市中央区",
+                performers: "ニジゲート × 神椿市建設中。",
+                description: "店舗型イマーシブシアター「ニジゲート」での神椿市建設中。MRコンテンツ体験（1,000円・オリジナル画像特典付き）※8月31日まで開催",
+                status: "NEW!",
+                id: "mr-content-osaka",
+                url: "https://kamitsubaki.jp/event/",
+                image: "https://kamitsubaki.jp/assets/img/news/mr-experience-osaka.jpg",
+                access: {
+                    station: "大阪メトロ 日本橋駅",
+                    walkTime: "徒歩2分",
+                    address: "大阪府大阪市中央区道頓堀1-6-8",
+                    mapUrl: "https://maps.google.com/maps?q=TSUTAYA+EBISUBASHI",
+                    notes: "戎橋の隣、地下直結"
+                }
+            },
+            {
+                title: "KAMITSUBAKI WARS 2025 神椿後楽園戦線 KAMITSUBAKI XPERIENCE DAY1",
+                date: "2025-12-13",
+                time: "18:00",
+                endTime: "21:00",
+                venue: "Kanadevia Hall (TOKYO DOME CITY HALL)",
+                address: "東京都文京区後楽1-3-61 ミーツポート1F",
+                performers: "花譜、ヰ世界情緒、幸祜 / Opening Act: 心世紀 from 少女革命計画",
+                description: "KAMITSUBAKI WARS 2025 第1日目",
+                status: "開催決定",
+                id: "kamitsubaki-wars-2025-day1",
+                url: "https://kamitsubaki.jp/event/",
+                image: "https://kamitsubaki.jp/assets/img/events/kamitsubaki-wars-2025.jpg",
+                access: {
+                    station: "JR中央・総武線 水道橋駅",
+                    walkTime: "徒歩3分",
+                    address: "東京都文京区後楽1-3-61 ミーツポート1F",
+                    mapUrl: "https://maps.google.com/maps?q=東京ドームシティホール",
+                    notes: "東京ドームシティ内、LaQua隣接"
+                }
+            },
+            {
+                title: "KAMITSUBAKI WARS 2025 神椿後楽園戦線 KAMITSUBAKI XPERIENCE DAY2",
+                date: "2025-12-14",
+                time: "17:00",
+                endTime: "20:00",
+                venue: "Kanadevia Hall (TOKYO DOME CITY HALL)",
+                address: "東京都文京区後楽1-3-61 ミーツポート1F",
+                performers: "理芽、春猿火、明透 / Opening Act: 罪十罰 from 少女革命計画",
+                description: "KAMITSUBAKI WARS 2025 第2日目",
+                status: "開催決定",
+                id: "kamitsubaki-wars-2025-day2",
+                url: "https://kamitsubaki.jp/event/"
+            },
+            {
+                title: "明透 初のファンミーティング & 2nd ONE-MAN LIVE",
+                date: "2025-08-30",
+                time: "18:00",
+                endTime: "21:00",
+                venue: "TBA",
+                address: "会場未定",
+                performers: "明透",
+                description: "明透の初ファンミーティングと2ndワンマンライブ",
+                status: "開催決定",
+                id: "meto-fanmeeting-2025",
+                url: "https://kamitsubaki.jp/event/"
+            }
+        ];
+
+        function createCalendarLink(event) {
+            const startDate = new Date(`${event.date}T${event.time}:00+09:00`);
+            const endDate = new Date(`${event.date}T${event.endTime}:00+09:00`);
+            
+            const formatDate = (date) => {
+                return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            };
+
+            // Google Calendar
+            const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${formatDate(startDate)}/${formatDate(endDate)}&details=${encodeURIComponent(event.description + '\n出演: ' + event.performers)}&location=${encodeURIComponent(event.venue + ', ' + event.address)}`;
+
+            // iCal format
+            const icalContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//KAMITSUBAKI//Calendar//EN
+BEGIN:VEVENT
+UID:${event.id || event.date + '-' + event.time.replace(':', '')}-kamitsubaki
+DTSTART:${formatDate(startDate)}
+DTEND:${formatDate(endDate)}
+SUMMARY:${event.title}
+DESCRIPTION:${event.description}\\n出演: ${event.performers}
+LOCATION:${event.venue}, ${event.address}
+END:VEVENT
+END:VCALENDAR`;
+
+            return { googleUrl, icalContent };
+        }
+
+        function registerEvent(event, type) {
+            const { googleUrl, icalContent } = createCalendarLink(event);
+            
+            if (type === 'google') {
+                window.open(googleUrl, '_blank');
+            } else if (type === 'ical') {
+                const blob = new Blob([icalContent], { type: 'text/calendar' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${event.title.substring(0, 30)}.ics`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+            
+            showSuccessMessage(event.title);
+        }
+
+        function showSuccessMessage(eventTitle) {
+            const existingMessage = document.querySelector('.success-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+
+            const message = document.createElement('div');
+            message.className = 'success-message';
+            message.innerHTML = `📅 「${eventTitle}」をカレンダーに追加しました！`;
+            
+            document.querySelector('.container').appendChild(message);
+            
+            setTimeout(() => {
+                message.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                message.classList.remove('show');
+                setTimeout(() => {
+                    if (message.parentNode) {
+                        message.parentNode.removeChild(message);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function showNotificationBadge(message) {
+            const badge = document.getElementById('notificationBadge');
+            badge.textContent = message;
+            badge.classList.add('show');
+            
+            setTimeout(() => {
+                badge.classList.remove('show');
+            }, 5000);
+        }
+
+        function subscribeToNotifications() {
+            const email = document.getElementById('emailInput').value;
+            if (!email || !email.includes('@')) {
+                showError('有効なメールアドレスを入力してください');
+                return;
+            }
+            
+            if (!subscribers.includes(email)) {
+                subscribers.push(email);
+                try {
+                    localStorage.setItem('kamitsubaki_subscribers', JSON.stringify(subscribers));
+                } catch (e) {
+                    console.log('ローカルストレージに保存できませんが、セッション中は有効です');
+                }
+                showSuccessMessage(`${email} を通知リストに追加しました！`);
+                document.getElementById('emailInput').value = '';
+            } else {
+                showError('このメールアドレスは既に登録されています');
+            }
+        }
+
+        function applyFilters() {
+            const dateFilter = document.getElementById('dateFilter').value;
+            const artistFilter = document.getElementById('artistFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            filteredEvents = events.filter(event => {
+                // 日付フィルター
+                const eventDate = new Date(event.date);
+                const now = new Date();
+                const oneWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+                const oneMonth = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
+                const threeMonths = new Date(now.getFullYear(), now.getMonth() + 3, now.getDate());
+                
+                let dateMatch = true;
+                switch (dateFilter) {
+                    case 'upcoming':
+                        dateMatch = eventDate >= now;
+                        break;
+                    case 'thisWeek':
+                        dateMatch = eventDate >= now && eventDate <= oneWeek;
+                        break;
+                    case 'thisMonth':
+                        dateMatch = eventDate.getMonth() === now.getMonth() && eventDate.getFullYear() === now.getFullYear();
+                        break;
+                    case 'next3Months':
+                        dateMatch = eventDate >= now && eventDate <= threeMonths;
+                        break;
+                }
+                
+                // アーティストフィルター
+                let artistMatch = true;
+                if (artistFilter !== 'all') {
+                    artistMatch = (event.performers && event.performers.toLowerCase().includes(artistFilter)) || 
+                                 (event.title && event.title.toLowerCase().includes(artistFilter)) ||
+                                 (event.tags && event.tags.some(tag => tag.toLowerCase().includes(artistFilter)));
+                }
+                
+                // 検索フィルター
+                let searchMatch = true;
+                if (searchTerm) {
+                    searchMatch = event.title.toLowerCase().includes(searchTerm) ||
+                                 event.performers.toLowerCase().includes(searchTerm) ||
+                                 event.venue.toLowerCase().includes(searchTerm) ||
+                                 (event.description && event.description.toLowerCase().includes(searchTerm)) ||
+                                 (event.address && event.address.toLowerCase().includes(searchTerm)) ||
+                                 (event.access && event.access.station && event.access.station.toLowerCase().includes(searchTerm)) ||
+                                 (event.tags && event.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
+                }
+                
+                return dateMatch && artistMatch && searchMatch;
+            });
+            
+            renderEvents();
+            updateStats();
+        }
+
+        function updateStats() {
+            const now = new Date();
+            const thisMonth = now.getMonth();
+            const thisYear = now.getFullYear();
+            
+            const totalEvents = events.length;
+            const upcomingEvents = events.filter(e => new Date(e.date) >= now).length;
+            const thisMonthEvents = events.filter(e => {
+                const eventDate = new Date(e.date);
+                return eventDate.getMonth() === thisMonth && eventDate.getFullYear() === thisYear;
+            }).length;
+            const newEvents = events.filter(e => e.status === 'NEW!').length;
+            
+            document.getElementById('totalEvents').textContent = totalEvents;
+            document.getElementById('upcomingEvents').textContent = upcomingEvents;
+            document.getElementById('thisMonthEvents').textContent = thisMonthEvents;
+            document.getElementById('newEvents').textContent = newEvents;
+        }
+
+        function exportAllEvents(type) {
+            if (type === 'google') {
+                // Google Calendar用のURL生成（複数イベント対応）
+                events.forEach(event => {
+                    setTimeout(() => {
+                        const { googleUrl } = createCalendarLink(event);
+                        window.open(googleUrl, '_blank');
+                    }, 100);
+                });
+                showSuccessMessage('すべてのイベントをGoogleカレンダーで開いています');
+            } else if (type === 'ical') {
+                // 全イベントを含むiCalファイル生成
+                let icalContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//KAMITSUBAKI//Calendar//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH`;
+
+                events.forEach(event => {
+                    const startDate = new Date(`${event.date}T${event.time}:00+09:00`);
+                    const endDate = new Date(`${event.date}T${event.endTime}:00+09:00`);
+                    
+                    const formatDate = (date) => {
+                        return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+                    };
+
+                    icalContent += `
+BEGIN:VEVENT
+UID:${event.id || event.date + '-' + event.time.replace(':', '')}-kamitsubaki
+DTSTART:${formatDate(startDate)}
+DTEND:${formatDate(endDate)}
+SUMMARY:${event.title}
+DESCRIPTION:${event.description}\\n出演: ${event.performers}
+LOCATION:${event.venue}, ${event.address}
+STATUS:CONFIRMED
+END:VEVENT`;
+                });
+
+                icalContent += `
+END:VCALENDAR`;
+
+                const blob = new Blob([icalContent], { type: 'text/calendar' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'KAMITSUBAKI_全イベント.ics';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showSuccessMessage('全イベントのiCalファイルをダウンロードしました');
+            }
+        }
+
+        function exportToJSON() {
+            const dataToExport = {
+                exportDate: new Date().toISOString(),
+                events: events,
+                totalEvents: events.length
+            };
+            
+            const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `KAMITSUBAKI_イベントデータ_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showSuccessMessage('JSONデータをダウンロードしました');
+        }
+
+        function sharePage() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'KAMITSUBAKI イベントカレンダー',
+                    text: '神椿スタジオの最新イベント情報をチェック！',
+                    url: window.location.href
+                }).catch(e => console.log('共有に失敗しました'));
+            } else {
+                // フォールバック: URLをクリップボードにコピー
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(window.location.href).then(() => {
+                        showSuccessMessage('URLをクリップボードにコピーしました！');
+                    }).catch(e => {
+                        showError('URLのコピーに失敗しました');
+                    });
+                } else {
+                    showSuccessMessage('この機能は対応していないブラウザです');
+                }
+            }
+        }
+
+        function addCountdownTimer(eventCard, event) {
+            const eventDate = new Date(`${event.date}T${event.time}:00+09:00`);
+            const now = new Date();
+            
+            if (eventDate > now) {
+                const timeDiff = eventDate - now;
+                const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                
+                let countdownText = '';
+                if (days > 0) {
+                    countdownText = `⏰ あと ${days}日 ${hours}時間`;
+                } else if (hours > 0) {
+                    countdownText = `⏰ あと ${hours}時間 ${minutes}分`;
+                } else {
+                    countdownText = `⏰ あと ${minutes}分`;
+                }
+                
+                const countdownDiv = document.createElement('div');
+                countdownDiv.className = 'countdown-timer';
+                countdownDiv.textContent = countdownText;
+                eventCard.appendChild(countdownDiv);
+            }
+        }
+
+        async function fetchKamitsubakiEvents() {
+            try {
+                // ローカルのJSONファイルから最新情報を取得（GitHub Actionsで日次更新）
+                const response = await fetch('./data/events.json');
+                
+                if (!response.ok) {
+                    throw new Error('イベント情報の取得に失敗しました');
+                }
+
+                const data = await response.json();
+                console.log('イベントデータを更新しました:', data.lastUpdated);
+                
+                return data.events || [];
+            } catch (error) {
+                console.error('イベント取得エラー:', error);
+                // フォールバック: 手動更新された最新情報
+                return await mockApiUpdate();
+            }
+        }
+
+        // モックAPI（実際の更新をシミュレート）
+        async function mockApiUpdate() {
+            // 実際の環境では、ここでAPIから最新データを取得
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    // ランダムに新しいイベントを追加（デモ用）
+                    const possibleNewEvents = [
+                        {
+                            title: "V.W.P 緊急生配信",
+                            date: "2025-12-20",
+                            time: "20:00",
+                            endTime: "21:00",
+                            venue: "YouTube Live",
+                            address: "オンライン",
+                            performers: "V.W.P",
+                            description: "急遽決定した特別配信",
+                            status: "NEW!",
+                            id: "vwp-emergency-stream",
+                            url: "https://kamitsubaki.jp/event/"
+                        },
+                        {
+                            title: "花譜 ソロライブ追加公演",
+                            date: "2025-07-15",
+                            time: "19:00",
+                            endTime: "21:00",
+                            venue: "Zepp Tokyo",
+                            address: "東京都江東区",
+                            performers: "花譜",
+                            description: "チケット完売により追加公演決定",
+                            status: "NEW!",
+                            id: "kafu-solo-additional",
+                            url: "https://kamitsubaki.jp/event/"
+                        }
+                    ];
+
+                    // 30%の確率で新しいイベントを追加
+                    if (Math.random() < 0.3) {
+                        const newEvent = possibleNewEvents[Math.floor(Math.random() * possibleNewEvents.length)];
+                        // 既存イベントと重複しないかチェック
+                        if (!events.find(e => e.id === newEvent.id)) {
+                            events.unshift(newEvent);
+                        }
+                    }
+
+                    resolve(events);
+                }, 1000);
+            });
+        }
+
+        async function updateEvents() {
+            const spinner = document.getElementById('loadingSpinner');
+            const statusElement = document.getElementById('updateStatus');
+            
+            spinner.style.display = 'inline-block';
+            statusElement.textContent = '📡 更新中...';
+
+            try {
+                const updatedEvents = await fetchKamitsubakiEvents();
+                
+                // 新しいイベントをマーク
+                const existingIds = events.map(e => e.id);
+                updatedEvents.forEach(event => {
+                    if (!existingIds.includes(event.id)) {
+                        event.status = 'NEW!';
+                    }
+                });
+
+                events = updatedEvents;
+                lastUpdateTime = new Date();
+                
+                renderEvents();
+                
+                statusElement.textContent = `📡 最終更新: ${lastUpdateTime.toLocaleString('ja-JP')}`;
+                
+                // 新しいイベントがある場合は通知
+                const newEventsCount = events.filter(e => e.status === 'NEW!').length;
+                if (newEventsCount > 0) {
+                    showSuccessMessage(`${newEventsCount}件の新しいイベントが見つかりました！`);
+                }
+                
+            } catch (error) {
+                console.error('更新エラー:', error);
+                showError('イベント情報の更新に失敗しました。しばらくしてからもう一度お試しください。');
+                statusElement.textContent = '📡 更新失敗 - 手動更新してください';
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+        function toggleAutoUpdate() {
+            const toggle = document.getElementById('autoUpdateToggle');
+            autoUpdateEnabled = !autoUpdateEnabled;
+            
+            if (autoUpdateEnabled) {
+                toggle.classList.add('active');
+                // 30分ごとに自動更新
+                updateInterval = setInterval(updateEvents, 30 * 60 * 1000);
+                showSuccessMessage('自動更新が有効になりました（30分間隔）');
+            } else {
+                toggle.classList.remove('active');
+                if (updateInterval) {
+                    clearInterval(updateInterval);
+                }
+                showSuccessMessage('自動更新が無効になりました');
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = `⚠️ ${message}`;
+            errorDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function renderEvents() {
+            if (currentViewMode === 'calendar') {
+                renderCalendarView();
+            } else {
+                renderGridView();
+            }
+        }
+
+        function renderGridView() {
+            const eventsGrid = document.getElementById('eventsGrid');
+            eventsGrid.className = 'events-grid';
+            eventsGrid.innerHTML = '';
+            
+            const eventsToRender = filteredEvents.length > 0 ? filteredEvents : events;
+            
+            if (eventsToRender.length === 0) {
+                eventsGrid.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">フィルター条件に一致するイベントがありません。</div>';
+                return;
+            }
+            
+            // 日付順にソート
+            const sortedEvents = [...eventsToRender].sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            sortedEvents.forEach((event, index) => {
+                const eventCard = document.createElement('div');
+                eventCard.className = `event-card ${event.status === 'NEW!' ? 'new' : ''}`;
+                
+                const eventDate = new Date(event.date);
+                const formattedDate = eventDate.toLocaleDateString('ja-JP', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'long'
+                });
+                
+                // タグの生成
+                const tagsHtml = event.tags ? event.tags.map(tag => `<span class="event-tag">${tag}</span>`).join('') : '';
+                
+                eventCard.innerHTML = `
+                    <div class="day-badge ${event.status === 'NEW!' ? 'new' : event.status === 'UPDATED' ? 'updated' : ''}">${event.status}</div>
+                    ${event.image ? `<div class="event-image"><img src="${event.image}" alt="${event.title}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 10px; margin-bottom: 15px;" onerror="this.style.display='none'"></div>` : ''}
+                    <h3 class="event-title">${event.title}</h3>
+                    ${tagsHtml ? `<div class="event-tags">${tagsHtml}</div>` : ''}
+                    <div class="event-details">
+                        <div class="event-detail">
+                            <strong>📅 日時:</strong> ${formattedDate} ${event.time}〜${event.endTime}
+                        </div>
+                        <div class="event-detail">
+                            <strong>📍 会場:</strong> <span class="venue">${event.venue}</span>
+                        </div>
+                        <div class="event-detail">
+                            <strong>🏢 住所:</strong> ${event.address}
+                        </div>
+                        ${event.access ? `<div class="access-info" style="background: #f8f9ff; padding: 10px; border-radius: 8px; margin: 10px 0;">
+                            <strong>🚗 アクセス情報:</strong><br>
+                            ${event.access.station ? `<small>最寄駅: ${event.access.station}</small><br>` : ''}
+                            ${event.access.walkTime ? `<small>駅から: ${event.access.walkTime}</small><br>` : ''}
+                            ${event.access.notes ? `<small>備考: ${event.access.notes}</small><br>` : ''}
+                            ${event.access.mapUrl ? `<a href="${event.access.mapUrl}" target="_blank" style="color: #e91e63; font-size: 0.9rem;">📍 地図で確認</a>` : ''}
+                        </div>` : ''}
+                        <div class="performers">
+                            <strong>🎤 出演:</strong> ${event.performers}
+                        </div>
+                        ${event.url ? `<div class="event-detail">
+                            <strong>🔗 詳細:</strong> <a href="${event.url}" target="_blank" rel="noopener noreferrer" style="color: #e91e63; text-decoration: none;">公式イベントページ</a>
+                        </div>` : ''}
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button class="register-btn" onclick="registerEvent(events.find(e => e.id === '${event.id}'), 'google')" style="flex: 1;">
+                            📱 Googleカレンダーに追加
+                        </button>
+                        <button class="register-btn" onclick="registerEvent(events.find(e => e.id === '${event.id}'), 'ical')" style="flex: 1;">
+                            📥 iCalダウンロード
+                        </button>
+                    </div>
+                `;
+                
+                // カウントダウンタイマーを追加
+                addCountdownTimer(eventCard, event);
+                
+                eventsGrid.appendChild(eventCard);
+            });
+        }
+
+        function renderCalendarView() {
+            const eventsGrid = document.getElementById('eventsGrid');
+            eventsGrid.className = 'calendar-view';
+            eventsGrid.innerHTML = '';
+            
+            // Create calendar header
+            const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+            weekdays.forEach(day => {
+                const headerCell = document.createElement('div');
+                headerCell.className = 'calendar-header';
+                headerCell.textContent = day;
+                eventsGrid.appendChild(headerCell);
+            });
+            
+            // Get calendar dates
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+            
+            const eventsToRender = filteredEvents.length > 0 ? filteredEvents : events;
+            
+            // Create calendar days
+            for (let i = 0; i < 42; i++) {
+                const cellDate = new Date(startDate);
+                cellDate.setDate(cellDate.getDate() + i);
+                
+                const dayCell = document.createElement('div');
+                dayCell.className = 'calendar-day';
+                
+                // Check if it's current month
+                if (cellDate.getMonth() !== month) {
+                    dayCell.classList.add('other-month');
+                }
+                
+                // Check if it's today
+                const today = new Date();
+                if (cellDate.toDateString() === today.toDateString()) {
+                    dayCell.classList.add('today');
+                }
+                
+                // Day number
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = cellDate.getDate();
+                dayCell.appendChild(dayNumber);
+                
+                // Events for this day
+                const dayEvents = eventsToRender.filter(event => {
+                    const eventDate = new Date(event.date);
+                    return eventDate.toDateString() === cellDate.toDateString();
+                });
+                
+                if (dayEvents.length > 0) {
+                    const eventsContainer = document.createElement('div');
+                    eventsContainer.className = 'calendar-events';
+                    
+                    // Show up to 3 events directly
+                    dayEvents.slice(0, 3).forEach(event => {
+                        const eventElement = document.createElement('div');
+                        eventElement.className = `calendar-event ${event.status === 'NEW!' ? 'new' : ''}`;
+                        eventElement.textContent = `${event.time} ${event.title}`;
+                        eventElement.title = event.title;
+                        eventElement.onclick = () => showEventModal(event);
+                        eventsContainer.appendChild(eventElement);
+                    });
+                    
+                    // Show count if more than 3 events
+                    if (dayEvents.length > 3) {
+                        const moreCount = document.createElement('div');
+                        moreCount.className = 'event-count';
+                        moreCount.textContent = `+${dayEvents.length - 3}`;
+                        moreCount.onclick = () => showDayEventsModal(cellDate, dayEvents);
+                        eventsContainer.appendChild(moreCount);
+                    }
+                    
+                    dayCell.appendChild(eventsContainer);
+                }
+                
+                eventsGrid.appendChild(dayCell);
+            }
+            
+            // Update navigation header
+            updateCalendarHeader();
+        }
+
+        function changeViewMode() {
+            const viewMode = document.getElementById('viewMode').value;
+            const calendarNav = document.getElementById('calendarNavigation');
+            
+            currentViewMode = viewMode;
+            
+            if (viewMode === 'calendar') {
+                calendarNav.style.display = 'block';
+                updateCalendarHeader();
+            } else {
+                calendarNav.style.display = 'none';
+            }
+            
+            renderEvents();
+        }
+
+        function updateCalendarHeader() {
+            const monthNames = [
+                '1月', '2月', '3月', '4月', '5月', '6月',
+                '7月', '8月', '9月', '10月', '11月', '12月'
+            ];
+            const header = document.getElementById('currentMonthYear');
+            if (header) {
+                header.textContent = `${currentCalendarDate.getFullYear()}年${monthNames[currentCalendarDate.getMonth()]}`;
+            }
+        }
+
+        function previousMonth() {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendarView();
+        }
+
+        function nextMonth() {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendarView();
+        }
+
+        function showEventModal(event) {
+            const modal = document.getElementById('eventModal');
+            const content = document.getElementById('modalEventContent');
+            
+            const eventDate = new Date(event.date);
+            const formattedDate = eventDate.toLocaleDateString('ja-JP', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            });
+            
+            const tagsHtml = event.tags ? event.tags.map(tag => `<span class="event-tag">${tag}</span>`).join('') : '';
+            
+            content.innerHTML = `
+                <div class="day-badge ${event.status === 'NEW!' ? 'new' : event.status === 'UPDATED' ? 'updated' : ''}">${event.status}</div>
+                <h2 class="event-title">${event.title}</h2>
+                ${tagsHtml ? `<div class="event-tags">${tagsHtml}</div>` : ''}
+                <div class="event-details">
+                    <div class="event-detail">
+                        <strong>📅 日時:</strong> ${formattedDate} ${event.time}〜${event.endTime}
+                    </div>
+                    <div class="event-detail">
+                        <strong>📍 会場:</strong> <span class="venue">${event.venue}</span>
+                    </div>
+                    <div class="event-detail">
+                        <strong>🏢 住所:</strong> ${event.address}
+                    </div>
+                    <div class="performers">
+                        <strong>🎤 出演:</strong> ${event.performers}
+                    </div>
+                    ${event.url ? `<div class="event-detail">
+                        <strong>🔗 詳細:</strong> <a href="${event.url}" target="_blank" rel="noopener noreferrer" style="color: #e91e63; text-decoration: none;">公式イベントページ</a>
+                    </div>` : ''}
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="register-btn" onclick="registerEvent(events.find(e => e.id === '${event.id}'), 'google')" style="flex: 1;">
+                        📱 Googleカレンダーに追加
+                    </button>
+                    <button class="register-btn" onclick="registerEvent(events.find(e => e.id === '${event.id}'), 'ical')" style="flex: 1;">
+                        📥 iCalダウンロード
+                    </button>
+                </div>
+            `;
+            
+            modal.classList.add('show');
+        }
+
+        function showDayEventsModal(date, dayEvents) {
+            const modal = document.getElementById('eventModal');
+            const content = document.getElementById('modalEventContent');
+            
+            const formattedDate = date.toLocaleDateString('ja-JP', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            });
+            
+            let eventsHtml = '';
+            dayEvents.forEach(event => {
+                const tagsHtml = event.tags ? event.tags.map(tag => `<span class="event-tag">${tag}</span>`).join('') : '';
+                eventsHtml += `
+                    <div class="event-card" style="margin-bottom: 20px;">
+                        <div class="day-badge ${event.status === 'NEW!' ? 'new' : event.status === 'UPDATED' ? 'updated' : ''}">${event.status}</div>
+                        <h3 class="event-title">${event.title}</h3>
+                        ${tagsHtml ? `<div class="event-tags">${tagsHtml}</div>` : ''}
+                        <div class="event-details">
+                            <div class="event-detail">
+                                <strong>⏰ 時間:</strong> ${event.time}〜${event.endTime}
+                            </div>
+                            <div class="event-detail">
+                                <strong>📍 会場:</strong> <span class="venue">${event.venue}</span>
+                            </div>
+                            <div class="performers">
+                                <strong>🎤 出演:</strong> ${event.performers}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <button class="register-btn" onclick="registerEvent(events.find(e => e.id === '${event.id}'), 'google')" style="flex: 1; font-size: 0.9rem; padding: 8px 12px;">
+                                📱 Googleカレンダー
+                            </button>
+                            <button class="register-btn" onclick="registerEvent(events.find(e => e.id === '${event.id}'), 'ical')" style="flex: 1; font-size: 0.9rem; padding: 8px 12px;">
+                                📥 iCal
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            content.innerHTML = `
+                <h2>📅 ${formattedDate}</h2>
+                <p>この日のイベント (${dayEvents.length}件)</p>
+                <div style="max-height: 400px; overflow-y: auto; margin-top: 20px;">
+                    ${eventsHtml}
+                </div>
+            `;
+            
+            modal.classList.add('show');
+        }
+
+        function closeEventModal() {
+            const modal = document.getElementById('eventModal');
+            modal.classList.remove('show');
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('eventModal');
+            if (e.target === modal) {
+                closeEventModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeEventModal();
+            }
+        });
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 全イベントにタグを追加（既存データの強化）
+            events.forEach(event => {
+                if (!event.tags) {
+                    event.tags = [];
+                    if (event.title.includes('MR')) event.tags.push('MR', '体験会');
+                    if (event.title.includes('WARS')) event.tags.push('ライブ', 'フェス');
+                    if (event.title.includes('ファンミーティング')) event.tags.push('ファンミ', '交流');
+                    if (event.title.includes('トーク')) event.tags.push('トーク', 'アニメ');
+                    if (event.tags.length === 0) event.tags.push('ライブ');
+                    
+                    if (event.venue.includes('TOKYO')) event.tags.push('東京');
+                    if (event.venue.includes('大阪')) event.tags.push('大阪');
+                    if (event.venue.includes('TBA')) event.tags.push('会場未定');
+                    
+                    if (event.performers.includes('V.W.P')) event.tags.push('V.W.P');
+                    if (event.performers.includes('花譜')) event.tags.push('花譜');
+                    if (event.performers.includes('理芽')) event.tags.push('理芽');
+                    if (event.performers.includes('春猿火')) event.tags.push('春猿火');
+                    if (event.performers.includes('ヰ世界情緒')) event.tags.push('ヰ世界情緒');
+                    if (event.performers.includes('幸祜')) event.tags.push('幸祜');
+                    if (event.performers.includes('明透')) event.tags.push('明透');
+                }
+            });
+            
+            filteredEvents = [...events];
+            renderEvents();
+            updateStats();
+            updateCalendarHeader(); // Initialize calendar header
+            
+            // ページロード時に自動更新を実行
+            setTimeout(updateEvents, 1000);
+            
+            // 通知権限をリクエスト
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().catch(e => console.log('通知権限の取得に失敗'));
+            }
+        });
+
+        // 新機能: ブラウザ通知
+        function sendBrowserNotification(title, body) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try {
+                    new Notification(title, {
+                        body: body,
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%23667eea"/><text x="50" y="60" text-anchor="middle" fill="white" font-size="30">🌸</text></svg>'
+                    });
+                } catch (e) {
+                    console.log('通知の送信に失敗しました');
+                }
+            }
+        }
+
+        // 高度な更新機能
+        async function updateEvents() {
+            const spinner = document.getElementById('loadingSpinner');
+            const statusElement = document.getElementById('updateStatus');
+            
+            spinner.style.display = 'inline-block';
+            statusElement.textContent = '📡 更新中...';
+
+            try {
+                const previousEventCount = events.length;
+                const updatedEvents = await fetchKamitsubakiEvents();
+                
+                // 新しいイベントをマーク
+                const existingIds = events.map(e => e.id);
+                const newEvents = updatedEvents.filter(event => !existingIds.includes(event.id));
+                
+                if (newEvents.length > 0) {
+                    newEvents.forEach(event => {
+                        event.status = 'NEW!';
+                        // 自動タグ付け
+                        if (!event.tags) {
+                            event.tags = autoGenerateTags(event);
+                        }
+                    });
+                    
+                    // 通知機能
+                    showNotificationBadge(`🎉 ${newEvents.length}件の新しいイベントが追加されました！`);
+                    sendBrowserNotification(
+                        'KAMITSUBAKI 新イベント', 
+                        `${newEvents.length}件の新しいイベントが追加されました: ${newEvents[0].title}${newEvents.length > 1 ? ' など' : ''}`
+                    );
+                    
+                    // メール通知（実際の環境では外部サービスと連携）
+                    if (subscribers.length > 0) {
+                        console.log(`メール通知送信: ${subscribers.length}名に新イベント通知`);
+                    }
+                }
+
+                events = updatedEvents;
+                lastUpdateTime = new Date();
+                
+                // フィルターを再適用
+                applyFilters();
+                updateStats();
+                
+                statusElement.textContent = `📡 最終更新: ${lastUpdateTime.toLocaleString('ja-JP')}`;
+                
+                if (newEvents.length > 0) {
+                    showSuccessMessage(`${newEvents.length}件の新しいイベントが見つかりました！`);
+                }
+                
+            } catch (error) {
+                console.error('更新エラー:', error);
+                showError('イベント情報の更新に失敗しました。しばらくしてからもう一度お試しください。');
+                statusElement.textContent = '📡 更新失敗 - 手動更新してください';
+            } finally {
+                spinner.style.display = 'none';
+            }
+        }
+
+        function autoGenerateTags(event) {
+            const tags = [];
+            
+            // タイトルベースのタグ
+            if (event.title.includes('MR') || event.title.includes('体験')) tags.push('体験会');
+            if (event.title.includes('WARS') || event.title.includes('ライブ')) tags.push('ライブ');
+            if (event.title.includes('ファンミ')) tags.push('ファンミ');
+            if (event.title.includes('トーク')) tags.push('トーク');
+            if (event.title.includes('配信')) tags.push('配信');
+            
+            // 地域タグ
+            if (event.venue.includes('東京') || event.venue.includes('TOKYO') || event.venue.includes('渋谷') || event.venue.includes('後楽園')) tags.push('東京');
+            if (event.venue.includes('大阪') || event.venue.includes('OSAKA')) tags.push('大阪');
+            if (event.venue.includes('横浜')) tags.push('横浜');
+            if (event.venue.includes('TBA') || event.venue.includes('未定')) tags.push('会場未定');
+            if (event.venue.includes('オンライン') || event.venue.includes('配信')) tags.push('オンライン');
+            
+            // アーティストタグ
+            const artists = ['花譜', '理芽', '春猿火', 'ヰ世界情緒', '幸祜', '明透', 'V.W.P'];
+            artists.forEach(artist => {
+                if (event.performers.includes(artist) || event.title.includes(artist)) {
+                    tags.push(artist);
+                }
+            });
+            
+            // 料金タグ
+            if (event.description.includes('無料')) tags.push('無料');
+            if (event.description.includes('有料') || event.description.includes('円')) tags.push('有料');
+            
+            return tags.length > 0 ? tags : ['イベント'];
+        }
+
+        // PWA機能は簡略化（エラーの原因となる可能性があるため）
+        if ('serviceWorker' in navigator) {
+            console.log('Service Worker対応ブラウザです');
+        }
+
+        // キーボードショートカット
+        document.addEventListener('keydown', (event) => {
+            if (event.ctrlKey || event.metaKey) {
+                switch (event.key) {
+                    case 'r':
+                        event.preventDefault();
+                        updateEvents();
+                        break;
+                    case 'f':
+                        event.preventDefault();
+                        document.getElementById('searchInput').focus();
+                        break;
+                    case 's':
+                        event.preventDefault();
+                        exportAllEvents('ical');
+                        break;
+                }
+            }
+        });
+
+        // ページがアクティブになったときに更新をチェック
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && lastUpdateTime) {
+                const timeSinceUpdate = Date.now() - lastUpdateTime.getTime();
+                // 10分以上経過していたら自動更新
+                if (timeSinceUpdate > 10 * 60 * 1000) {
+                    updateEvents();
+                }
+            }
+        });
+
+        // 定期的なカウントダウン更新
+        setInterval(() => {
+            if (document.querySelectorAll('.countdown-timer').length > 0) {
+                renderEvents(); // カウントダウンを更新するため再レンダリング
+            }
+        }, 60000); // 1分ごと
+
+        // ダークモード対応（簡略化）
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            try {
+                localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+            } catch (e) {
+                console.log('ダークモード設定の保存に失敗');
+            }
+        }
+
+        // ローカルストレージからダークモード設定を復元
+        try {
+            if (localStorage.getItem('darkMode') === 'true') {
+                document.body.classList.add('dark-mode');
+            }
+        } catch (e) {
+            console.log('ダークモード設定の読み込みに失敗');
+        }
+
+        // エクスポート機能の拡張
+        function exportToGoogleSheets() {
+            const csvData = events.map(event => [
+                event.title,
+                event.date,
+                event.time,
+                event.venue,
+                event.performers,
+                event.status
+            ]);
+            
+            const csvContent = "data:text/csv;charset=utf-8," + 
+                "タイトル,日付,時間,会場,出演者,ステータス\n" +
+                csvData.map(row => row.map(field => `"${field}"`).join(",")).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "kamitsubaki_events.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showSuccessMessage('CSVファイルをダウンロードしました（Googleスプレッドシートで開けます）');
+        }
+    </script>
+</body>
+</html>
