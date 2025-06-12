@@ -9,6 +9,11 @@ on:
       - '**/*.js'
       - 'data/events.json'
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   screenshot:
     runs-on: ubuntu-latest
@@ -135,76 +140,122 @@ jobs:
           const fs = require('fs');
           const path = require('path');
           
-          // Check which screenshots exist
-          const screenshotDir = 'screenshots';
-          const screenshots = {
-            afterDesktop: fs.existsSync(path.join(screenshotDir, 'after-desktop.png')),
-            afterMobile: fs.existsSync(path.join(screenshotDir, 'after-mobile.png')),
-            beforeDesktop: fs.existsSync(path.join(screenshotDir, 'before-desktop.png')),
-            beforeMobile: fs.existsSync(path.join(screenshotDir, 'before-mobile.png'))
-          };
-          
-          console.log('Screenshot status:', screenshots);
-          
-          const runUrl = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
-          
-          let comment = [
-            '## 📸 自動スクリーンショット / Automated Screenshots',
-            '',
-            'このPRのUIの変更が自動でキャプチャされました。',
-            'UI changes in this PR have been automatically captured.',
-            '',
-            `🔗 **[スクリーンショットをダウンロード / Download Screenshots](${runUrl})**`,
-            '',
-          ];
-          
-          // Add before screenshots
-          if (screenshots.beforeDesktop || screenshots.beforeMobile) {
-            comment.push('### 修正前 / Before');
-            comment.push('');
+          try {
+            // Check which screenshots exist
+            const screenshotDir = 'screenshots';
+            const screenshots = {
+              afterDesktop: fs.existsSync(path.join(screenshotDir, 'after-desktop.png')),
+              afterMobile: fs.existsSync(path.join(screenshotDir, 'after-mobile.png')),
+              beforeDesktop: fs.existsSync(path.join(screenshotDir, 'before-desktop.png')),
+              beforeMobile: fs.existsSync(path.join(screenshotDir, 'before-mobile.png'))
+            };
             
-            if (screenshots.beforeDesktop) {
-              comment.push('**デスクトップ / Desktop (1280x720)**');
-              comment.push('`before-desktop.png` - スクリーンショットは上記のリンクからダウンロードしてください。');
-              comment.push('');
+            console.log('Screenshot status:', screenshots);
+            
+            // Check if we have any screenshots at all
+            const hasAnyScreenshots = Object.values(screenshots).some(exists => exists);
+            if (!hasAnyScreenshots) {
+              console.log('No screenshots were generated successfully');
+              return;
             }
             
-            if (screenshots.beforeMobile) {
-              comment.push('**モバイル / Mobile (375x667)**');
-              comment.push('`before-mobile.png` - スクリーンショットは上記のリンクからダウンロードしてください。');
+            const runUrl = `${context.payload.repository.html_url}/actions/runs/${context.runId}`;
+            
+            let comment = [
+              '## 📸 自動スクリーンショット / Automated Screenshots',
+              '',
+              'このPRのUIの変更が自動でキャプチャされました。',
+              'UI changes in this PR have been automatically captured.',
+              '',
+              `🔗 **[スクリーンショットをダウンロード / Download Screenshots](${runUrl})**`,
+              '',
+            ];
+            
+            // Add before screenshots section only if we have any
+            if (screenshots.beforeDesktop || screenshots.beforeMobile) {
+              comment.push('### 修正前 / Before');
               comment.push('');
+              
+              if (screenshots.beforeDesktop) {
+                comment.push('**デスクトップ / Desktop (1280x720)**');
+                comment.push('`before-desktop.png` - スクリーンショットは上記のリンクからダウンロードしてください。');
+                comment.push('');
+              }
+              
+              if (screenshots.beforeMobile) {
+                comment.push('**モバイル / Mobile (375x667)**');
+                comment.push('`before-mobile.png` - スクリーンショットは上記のリンクからダウンロードしてください。');
+                comment.push('');
+              }
+            }
+            
+            // Add after screenshots section only if we have any
+            if (screenshots.afterDesktop || screenshots.afterMobile) {
+              comment.push('### 修正後 / After');
+              comment.push('');
+              
+              if (screenshots.afterDesktop) {
+                comment.push('**デスクトップ / Desktop (1280x720)**');
+                comment.push('`after-desktop.png` - スクリーンショットは上記のリンクからダウンロードしてください。');
+                comment.push('');
+              }
+              
+              if (screenshots.afterMobile) {
+                comment.push('**モバイル / Mobile (375x667)**');
+                comment.push('`after-mobile.png` - スクリーンショットは上記のリンクからダウンロードしてください。');
+                comment.push('');
+              }
+            }
+            
+            comment.push('---');
+            comment.push('🤖 このスクリーンショットは自動生成されました');
+            comment.push('🤖 These screenshots were automatically generated');
+            comment.push('');
+            comment.push('### ファイル一覧 / File List:');
+            if (screenshots.beforeDesktop) comment.push('- ✅ `before-desktop.png`');
+            if (screenshots.beforeMobile) comment.push('- ✅ `before-mobile.png`');
+            if (screenshots.afterDesktop) comment.push('- ✅ `after-desktop.png`');
+            if (screenshots.afterMobile) comment.push('- ✅ `after-mobile.png`');
+            
+            const commentBody = comment.join('\n');
+            console.log('Comment length:', commentBody.length);
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: commentBody
+            });
+            
+            console.log('Comment posted successfully');
+            
+          } catch (error) {
+            console.error('Error posting comment:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
+            
+            // Try to post a simple fallback comment
+            try {
+              const fallbackBody = [
+                '## 📸 自動スクリーンショット / Automated Screenshots',
+                '',
+                'スクリーンショットのキャプチャが完了しました。',
+                'Screenshot capture completed.',
+                '',
+                `🔗 **[スクリーンショットをダウンロード / Download Screenshots](${context.payload.repository.html_url}/actions/runs/${context.runId})**`,
+                '',
+                '🤖 このスクリーンショットは自動生成されました',
+                '🤖 These screenshots were automatically generated'
+              ].join('\n');
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: fallbackBody
+              });
+              console.log('Fallback comment posted successfully');
+            } catch (fallbackError) {
+              console.error('Failed to post fallback comment:', fallbackError);
+              throw error; // Re-throw original error
             }
           }
-          
-          // Add after screenshots
-          comment.push('### 修正後 / After');
-          comment.push('');
-          
-          if (screenshots.afterDesktop) {
-            comment.push('**デスクトップ / Desktop (1280x720)**');
-            comment.push('`after-desktop.png` - スクリーンショットは上記のリンクからダウンロードしてください。');
-            comment.push('');
-          }
-          
-          if (screenshots.afterMobile) {
-            comment.push('**モバイル / Mobile (375x667)**');
-            comment.push('`after-mobile.png` - スクリーンショットは上記のリンクからダウンロードしてください。');
-            comment.push('');
-          }
-          
-          comment.push('---');
-          comment.push('🤖 このスクリーンショットは自動生成されました');
-          comment.push('🤖 These screenshots were automatically generated');
-          comment.push('');
-          comment.push('### ファイル一覧 / File List:');
-          if (screenshots.beforeDesktop) comment.push('- ✅ `before-desktop.png`');
-          if (screenshots.beforeMobile) comment.push('- ✅ `before-mobile.png`');
-          if (screenshots.afterDesktop) comment.push('- ✅ `after-desktop.png`');
-          if (screenshots.afterMobile) comment.push('- ✅ `after-mobile.png`');
-          
-          await github.rest.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-            body: comment.join('\n')
-          });
