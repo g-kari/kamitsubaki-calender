@@ -1,32 +1,26 @@
 {
-  "lastUpdated": "2025-06-10T04:24:01.090Z",
+  "lastUpdated": "2025-06-13T00:26:16.849Z",
   "events": [
     {
-      "id": "event-1749529441081-0",
+      "id": "event-1749774376839-0",
       "title": "明透 2nd ONE-MAN LIVE「BIRTH」",
       "date": "2025-08-30",
       "time": "17:00",
       "endTime": "17:00",
       "venue": "豊洲PIT",
-      "address": "東京都江東区豊洲6-1-23",
+      "address": "",
       "performers": "明透",
       "category": "live",
       "ticketInfo": "チケット情報は公式サイトをご確認ください",
-      "description": "明透2ndワンマンライブ",
-      "tags": ["明透", "ライブ"],
+      "description": "",
+      "tags": [],
       "status": "",
       "url": "https://toyosu.pia-pit.jp/access/",
-      "image": "https://kamitsubaki.jp/assets/img/artists/meito.jpg",
-      "access": {
-        "station": "ゆりかもめ 新豊洲駅",
-        "walkTime": "徒歩3分",
-        "address": "東京都江東区豊洲6-1-23",
-        "mapUrl": "https://maps.google.com/maps?q=豊洲PIT",
-        "notes": "新豊洲駅直結"
-      }
+      "image": null,
+      "access": null
     },
     {
-      "id": "event-1749529441083-1",
+      "id": "event-1749774376841-1",
       "title": "あすナー’s meeting「さまーすくーる ASCHOOL！」",
       "date": "2025-08-30",
       "time": "12:00",
@@ -39,10 +33,12 @@
       "description": "",
       "tags": [],
       "status": "",
-      "url": "https://toyosu.pia-pit.jp/access/"
+      "url": "https://toyosu.pia-pit.jp/access/",
+      "image": null,
+      "access": null
     },
     {
-      "id": "event-1749529441084-2",
+      "id": "event-1749774376842-2",
       "title": "THINKR XR CLASSICS presents KAMITSUBAKI FILM CONCERT「神椿演奏会 / 想像」 BY KAMITSUBAKI PHILHARMONIC ORCHESTRA",
       "date": "2025-08-11",
       "time": "17:00",
@@ -55,10 +51,12 @@
       "description": "",
       "tags": [],
       "status": "",
-      "url": "https://www.onikuru.jp/guide/information/"
+      "url": "https://www.onikuru.jp/guide/information/",
+      "image": null,
+      "access": null
     },
     {
-      "id": "event-1749529441085-3",
+      "id": "event-1749774376843-3",
       "title": "梓川 2nd ONE-MAN LIVE「PORT＿A」",
       "date": "2025-08-03",
       "time": "17:00",
@@ -71,10 +69,12 @@
       "description": "",
       "tags": [],
       "status": "",
-      "url": "https://info.diskgarage.com"
+      "url": "https://info.diskgarage.com",
+      "image": null,
+      "access": null
     },
     {
-      "id": "event-1749529441086-4",
+      "id": "event-1749774376844-4",
       "title": "KAMITSUBAKI WARS 2025 神椿川崎戦線  少女革命計画 1st LIVE/第一幕『改変』",
       "date": "2025-07-11",
       "time": "17:30",
@@ -87,10 +87,12 @@
       "description": "",
       "tags": [],
       "status": "",
-      "url": "https://l-tike.com/girlsrevolutionproject/"
+      "url": "https://l-tike.com/girlsrevolutionproject/",
+      "image": null,
+      "access": null
     },
     {
-      "id": "event-1749529441087-5",
+      "id": "event-1749774376845-5",
       "title": "HYPERION by THINKR feat. KAF FABLE γ",
       "date": "2025-07-06",
       "time": "13:00",
@@ -103,10 +105,12 @@
       "description": "",
       "tags": [],
       "status": "",
-      "url": "https://spaceodd.jp/access/"
+      "url": "https://spaceodd.jp/access/",
+      "image": null,
+      "access": null
     },
     {
-      "id": "event-1749529441087-6",
+      "id": "event-1749774376846-6",
       "title": "GOLD DISC",
       "date": "2025-12-01",
       "time": "19:00",
@@ -119,10 +123,12 @@
       "description": "",
       "tags": [],
       "status": "",
-      "url": "https://zerotokyo.jp/event/gold-disc-0628/"
+      "url": "https://zerotokyo.jp/event/gold-disc-0628/",
+      "image": null,
+      "access": null
     },
     {
-      "id": "event-1749529441088-7",
+      "id": "event-1749774376847-7",
       "title": "EXPO 2025 Virtual Osaka Helthcare Pavilion “Eudaimonia” presents VIRTUAL LIVE「ARK-或ル世界-」",
       "date": "2025-12-01",
       "time": "19:00",
@@ -135,10 +141,12 @@
       "description": "",
       "tags": [],
       "status": "",
-      "url": "https://eudaimonia-2025osaka-pavilion.jp/"
+      "url": "https://eudaimonia-2025osaka-pavilion.jp/",
+      "image": null,
+      "access": null
     },
     {
-      "id": "event-1749529441089-8",
+      "id": "event-1749774376847-8",
       "title": "WITCHES’ TALKSHOW ! ~神椿市建設中。TVアニメ放送直前トークライブ~《開催中止》",
       "date": "2025-06-14",
       "time": "12:00",
@@ -151,10 +159,12 @@
       "description": "",
       "tags": [],
       "status": "",
-      "url": "https://kamitsubaki.jp/news/2025/05/07/7176/"
+      "url": "https://kamitsubaki.jp/news/2025/05/07/7176/",
+      "image": null,
+      "access": null
     },
     {
-      "id": "event-1749529441090-9",
+      "id": "event-1749774376848-9",
       "title": "KAMITSUBAKI WARS 2025 神椿後楽園戦線 KAMITSUBAKI XPERIENCE",
       "date": "2025-06-13",
       "time": "18:00",
@@ -167,7 +177,9 @@
       "description": "",
       "tags": [],
       "status": "",
-      "url": "https://l-tike.com/kamitsubaki/"
+      "url": "https://l-tike.com/kamitsubaki/",
+      "image": null,
+      "access": null
     }
   ]
 }
