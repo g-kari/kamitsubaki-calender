@@ -45,7 +45,6 @@ jobs:
       - name: Prepare for GitHub Pages
         run: |
           cd dist
-          mv index-react.html index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
