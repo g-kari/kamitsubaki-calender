@@ -118,8 +118,7 @@ ls dist/
 - `vite.config.js` - Viteビルド設定
 
 ### レガシー & ビルド
-- `index-vanilla.html` - 元のバニラHTML/JS実装（保持）
-- `index.html` - ビルドされたReactアプリケーション（自動生成）
+- `index.html` - React アプリケーションの開発テンプレート（ビルド時は自動生成される）
 - `assets/` - ビルド成果物（自動生成）
 
 ### データ & アクション

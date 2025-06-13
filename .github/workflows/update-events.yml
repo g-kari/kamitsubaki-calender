@@ -56,7 +56,7 @@ jobs:
     - name: Build React application
       run: |
         npm run build
-        cp dist/index-react.html index.html
+        cp dist/index.html index.html
         cp -r dist/assets assets/
         
     - name: Commit and push changes

@@ -8,10 +8,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    copyPublicDir: true,
-    rollupOptions: {
-      input: 'index-react.html'
-    }
+    copyPublicDir: true
   },
   publicDir: 'public'
 })
