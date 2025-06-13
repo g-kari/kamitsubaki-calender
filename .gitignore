@@ -136,7 +136,7 @@ dist
 .pnp.*
 
 # Package management files (installed by GitHub Actions)
-package-lock.json
+# package-lock.json - removed to fix GitHub Pages deployment
 
 # Screenshot testing and temporary files
 screenshots/
