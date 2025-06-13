@@ -50,13 +50,13 @@ function Calendar({ events, onEventClick }) {
       case "event":
       case "fanmeeting":
       case "talk":
-        return "bg-pink-200"
+        return "bg-gray-300"
       case "live":
-        return "bg-red-200"
+        return "bg-gray-400"
       case "movie":
-        return "bg-purple-200"
+        return "bg-gray-500"
       default:
-        return "bg-blue-200"
+        return "bg-gray-200"
     }
   }
 
@@ -65,11 +65,11 @@ function Calendar({ events, onEventClick }) {
       case "event":
       case "fanmeeting":
       case "talk":
-        return "pink"
+        return "secondary"
       case "live":
-        return "blue"
+        return "secondary"
       case "movie":
-        return "purple"
+        return "secondary"
       default:
         return "secondary"
     }
@@ -123,12 +123,12 @@ function Calendar({ events, onEventClick }) {
                         title={event.title}
                         onClick={() => onEventClick && onEventClick(event)}
                         style={{
-                          background: getCategoryColor(event.category).includes('pink') ? '#fce7f3' : 
-                                     getCategoryColor(event.category).includes('red') ? '#fee2e2' : 
-                                     getCategoryColor(event.category).includes('purple') ? '#ede9fe' : '#dbeafe',
-                          color: getCategoryColor(event.category).includes('pink') ? '#be185d' : 
-                                getCategoryColor(event.category).includes('red') ? '#dc2626' : 
-                                getCategoryColor(event.category).includes('purple') ? '#7c3aed' : '#1d4ed8'
+                          background: getCategoryColor(event.category).includes('gray-300') ? '#f3f4f6' : 
+                                     getCategoryColor(event.category).includes('gray-400') ? '#e5e7eb' : 
+                                     getCategoryColor(event.category).includes('gray-500') ? '#d1d5db' : '#f9fafb',
+                          color: getCategoryColor(event.category).includes('gray-300') ? '#374151' : 
+                                getCategoryColor(event.category).includes('gray-400') ? '#1f2937' : 
+                                getCategoryColor(event.category).includes('gray-500') ? '#111827' : '#6b7280'
                         }}
                       >
                         {event.time} {event.title}
@@ -146,7 +146,7 @@ function Calendar({ events, onEventClick }) {
         <Card>
           <CardContent>
             <h3 className="v0-info-card-header">
-              <span className="v0-info-card-icon" style={{background: '#ec4899'}}></span>
+              <span className="v0-info-card-icon" style={{background: '#6b7280'}}></span>
               <span className="v0-info-card-title">EVENT</span>
             </h3>
             <div className="v0-info-card-content">
@@ -165,7 +165,7 @@ function Calendar({ events, onEventClick }) {
         <Card>
           <CardContent>
             <h3 className="v0-info-card-header">
-              <span className="v0-info-card-icon" style={{background: '#3b82f6'}}></span>
+              <span className="v0-info-card-icon" style={{background: '#374151'}}></span>
               <span className="v0-info-card-title">LIVE</span>
             </h3>
             <div className="v0-info-card-content">
@@ -184,7 +184,7 @@ function Calendar({ events, onEventClick }) {
         <Card>
           <CardContent>
             <h3 className="v0-info-card-header">
-              <span className="v0-info-card-icon" style={{background: '#8b5cf6'}}></span>
+              <span className="v0-info-card-icon" style={{background: '#1f2937'}}></span>
               <span className="v0-info-card-title">MOVIE</span>
             </h3>
             <div className="v0-info-card-content">
