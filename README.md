@@ -85,6 +85,32 @@ ls dist/
 
 **注意**: GitHub Pages デプロイは自動化されているため、通常は手動デプロイは不要です。
 
+### テスト (Playwright + MCP)
+
+このプロジェクトは GitHub Copilot との連携のために Playwright MCP (Model Context Protocol) に対応しています：
+
+```bash
+# Playwright テストを実行
+npm test
+
+# ヘッド付きモードでテスト実行 (ブラウザが見える)
+npm test:headed
+
+# インタラクティブなデバッグモード
+npm test:debug
+
+# テスト UI を使用
+npm test:ui
+
+# テストレポートを表示
+npm test:report
+
+# MCP サーバーを起動 (GitHub Copilot 用)
+npm run mcp-server
+```
+
+詳細な MCP 使用方法については [COPILOT_MCP.md](./COPILOT_MCP.md) を参照してください。
+
 ## 貢献について
 
 ### プルリクエスト要件

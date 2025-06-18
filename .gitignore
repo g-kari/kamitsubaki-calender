@@ -146,6 +146,12 @@ test-*.jpg
 server.pid
 server_base.pid
 
+# Playwright test results
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
 # Build artifacts
 dist/
 # But keep assets and index.html in root for GitHub Pages
