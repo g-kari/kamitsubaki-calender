@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modal Test</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        
+        /* Modal CSS - from our fixed implementation */
+        .event-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .event-modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        /* Responsive rules */
+        @media (max-width: 768px) {
+            .modal-content {
+                max-width: 95%;
+                max-height: 90vh;
+                padding: 20px;
+            }
+
+            .event-modal {
+                padding: 10px;
+            }
+        }
+
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Modal Centering Test</h1>
+    <p>This test validates that the modal is properly centered in the browser window.</p>
+    
+    <button class="test-button" onclick="showModal()">Test Modal</button>
+    <button class="test-button" onclick="addContent()">Add More Content</button>
+    
+    <!-- Modal -->
+    <div id="testModal" class="event-modal" onclick="hideModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="hideModal()">×</button>
+            <h2>Test Event Modal</h2>
+            <div id="modalContent">
+                <p><strong>📅 Date:</strong> 2024年1月15日</p>
+                <p><strong>📍 Venue:</strong> Test Venue</p>
+                <p><strong>🎭 Performers:</strong> Test Performers</p>
+                <p><strong>📝 Description:</strong> This is a test modal to verify proper centering behavior.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showModal() {
+            document.getElementById('testModal').classList.add('show');
+        }
+
+        function hideModal() {
+            document.getElementById('testModal').classList.remove('show');
+        }
+
+        function addContent() {
+            const content = document.getElementById('modalContent');
+            for (let i = 0; i < 10; i++) {
+                const p = document.createElement('p');
+                p.textContent = `Additional content line ${i + 1}. This tests overflow behavior and ensures the modal remains centered even with lots of content.`;
+                content.appendChild(p);
+            }
+        }
+    </script>
+</body>
+</html>
