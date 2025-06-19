@@ -1,8 +1,26 @@
 {
-  "lastUpdated": "2025-06-14T00:25:13.737Z",
+  "lastUpdated": "2025-06-19T00:26:19.368Z",
   "events": [
     {
-      "id": "event-1749860713726-0",
+      "id": "event-1750292779353-0",
+      "title": "雨宿り2nd ONE-MAN LIVE「濡れたままの傘で」",
+      "date": "2025-06-21",
+      "time": "16:00",
+      "endTime": "16:00",
+      "venue": "KMAパラダイスホール",
+      "address": "",
+      "performers": "雨宿り",
+      "category": "live",
+      "ticketInfo": "チケット情報は公式サイトをご確認ください",
+      "description": "",
+      "tags": [],
+      "status": "",
+      "url": "https://www.kma.co.jp/access",
+      "image": null,
+      "access": null
+    },
+    {
+      "id": "event-1750292779355-1",
       "title": "明透 2nd ONE-MAN LIVE「BIRTH」",
       "date": "2025-08-30",
       "time": "17:00",
@@ -20,7 +38,7 @@
       "access": null
     },
     {
-      "id": "event-1749860713728-1",
+      "id": "event-1750292779356-2",
       "title": "あすナー’s meeting「さまーすくーる ASCHOOL！」",
       "date": "2025-08-30",
       "time": "12:00",
@@ -38,7 +56,7 @@
       "access": null
     },
     {
-      "id": "event-1749860713729-2",
+      "id": "event-1750292779358-3",
       "title": "THINKR XR CLASSICS presents KAMITSUBAKI FILM CONCERT「神椿演奏会 / 想像」 BY KAMITSUBAKI PHILHARMONIC ORCHESTRA",
       "date": "2025-08-11",
       "time": "17:00",
@@ -56,7 +74,7 @@
       "access": null
     },
     {
-      "id": "event-1749860713730-3",
+      "id": "event-1750292779364-4",
       "title": "梓川 2nd ONE-MAN LIVE「PORT＿A」",
       "date": "2025-08-03",
       "time": "17:00",
@@ -74,7 +92,7 @@
       "access": null
     },
     {
-      "id": "event-1749860713732-4",
+      "id": "event-1750292779365-5",
       "title": "KAMITSUBAKI WARS 2025 神椿川崎戦線  少女革命計画 1st LIVE/第一幕『改変』",
       "date": "2025-07-11",
       "time": "17:30",
@@ -92,7 +110,7 @@
       "access": null
     },
     {
-      "id": "event-1749860713733-5",
+      "id": "event-1750292779366-6",
       "title": "HYPERION by THINKR feat. KAF FABLE γ",
       "date": "2025-07-06",
       "time": "13:00",
@@ -110,7 +128,7 @@
       "access": null
     },
     {
-      "id": "event-1749860713734-6",
+      "id": "event-1750292779366-7",
       "title": "GOLD DISC",
       "date": "2025-12-01",
       "time": "19:00",
@@ -128,7 +146,7 @@
       "access": null
     },
     {
-      "id": "event-1749860713735-7",
+      "id": "event-1750292779367-8",
       "title": "EXPO 2025 Virtual Osaka Helthcare Pavilion “Eudaimonia” presents VIRTUAL LIVE「ARK-或ル世界-」",
       "date": "2025-12-01",
       "time": "19:00",
@@ -146,7 +164,7 @@
       "access": null
     },
     {
-      "id": "event-1749860713736-8",
+      "id": "event-1750292779367-9",
       "title": "WITCHES’ TALKSHOW ! ~神椿市建設中。TVアニメ放送直前トークライブ~《開催中止》",
       "date": "2025-06-14",
       "time": "12:00",
@@ -160,24 +178,6 @@
       "tags": [],
       "status": "",
       "url": "https://kamitsubaki.jp/news/2025/05/07/7176/",
-      "image": null,
-      "access": null
-    },
-    {
-      "id": "event-1749860713737-9",
-      "title": "KAMITSUBAKI WARS 2025 神椿後楽園戦線 KAMITSUBAKI XPERIENCE",
-      "date": "2025-06-13",
-      "time": "18:00",
-      "endTime": "18:00",
-      "venue": "Kanadevia Hall （TOKYO DOME CITY HALL）",
-      "address": "",
-      "performers": "KAMITSUBAKI STUDIO",
-      "category": "live",
-      "ticketInfo": "チケット情報は公式サイトをご確認ください",
-      "description": "",
-      "tags": [],
-      "status": "",
-      "url": "https://l-tike.com/kamitsubaki/",
       "image": null,
       "access": null
     }
